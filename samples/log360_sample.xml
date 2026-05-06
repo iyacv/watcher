@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Events>
+  <Event>
+    <EventID>EVT-001</EventID>
+    <Timestamp>2026-05-01T10:45:00</Timestamp>
+    <SourceHost>192.168.1.10</SourceHost>
+    <EventType>Authentication Failure</EventType>
+    <Severity>High</Severity>
+    <User>admin</User>
+    <Description>Multiple failed login attempts detected from external IP 203.0.113.42</Description>
+  </Event>
+  <Event>
+    <EventID>EVT-002</EventID>
+    <Timestamp>2026-05-01T11:00:00</Timestamp>
+    <SourceHost>192.168.1.20</SourceHost>
+    <EventType>Privilege Escalation</EventType>
+    <Severity>Critical</Severity>
+    <User>jdoe</User>
+    <Description>User jdoe attempted to escalate privileges to root without authorization.</Description>
+  </Event>
+  <Event>
+    <EventID>EVT-003</EventID>
+    <Timestamp>2026-05-01T09:30:00</Timestamp>
+    <SourceHost>192.168.1.10</SourceHost>
+    <EventType>Unauthorized Access</EventType>
+    <Severity>High</Severity>
+    <User>unknown</User>
+    <Description>Access attempt to restricted /admin endpoint from unauthenticated session.</Description>
+  </Event>
+</Events>

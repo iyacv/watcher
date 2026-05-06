@@ -1,0 +1,62 @@
+[
+  {
+    "scan_date": "2026-05-06",
+    "target": { "host": "192.168.1.10", "port": 443 },
+    "vulnerabilities": [
+      {
+        "id": "CVE-2024-38819",
+        "name": "Spring Framework Path Traversal",
+        "severity": "high",
+        "cvss": 7.5,
+        "description": "A path traversal vulnerability in Spring Framework allows unauthenticated attackers to read arbitrary files from the server filesystem via crafted HTTP requests. The e-training portal's backend is built on Spring Boot 3.1.4 which is affected. Sensitive files including application.properties containing database credentials are accessible.",
+        "remediation": "Upgrade Spring Framework to 5.3.41, 6.0.25, or 6.1.14. Apply Spring Security filter to block path traversal patterns. Restrict file system permissions on the application user account."
+      },
+      {
+        "id": "CVE-2024-45519",
+        "name": "Zimbra Remote Code Execution via Postjournal",
+        "severity": "critical",
+        "cvss": 9.8,
+        "description": "A critical remote code execution vulnerability in Zimbra Collaboration Suite allows unauthenticated attackers to execute arbitrary commands by sending crafted SMTP traffic to the postjournal service. The e-training portal's email notification system uses Zimbra. Active exploitation in the wild confirmed by CISA.",
+        "remediation": "Apply Zimbra security update immediately. Disable the postjournal service if not required. Block access to port 10027 at the network perimeter firewall."
+      },
+      {
+        "id": "CVE-2024-8190",
+        "name": "Ivanti Cloud Services Appliance OS Command Injection",
+        "severity": "high",
+        "cvss": 7.2,
+        "description": "An OS command injection vulnerability in Ivanti Cloud Services Appliance allows a remote authenticated attacker with administrator privileges to execute arbitrary code. The vulnerability exists in the administrative web interface and can be chained with authentication bypass vulnerabilities for unauthenticated exploitation.",
+        "remediation": "Upgrade Ivanti CSA to version 4.6 patch 519 or later. As a mitigation, restrict access to the administrative interface to trusted IP addresses only."
+      },
+      {
+        "id": "SESS-2026-001",
+        "name": "Session Token Not Invalidated on Logout",
+        "severity": "medium",
+        "cvss": 5.4,
+        "description": "The e-training portal does not properly invalidate session tokens when a user logs out. Testing confirmed that a captured session token remains valid for up to 8 hours after logout. An attacker who captures a session token via network interception or XSS can use it long after the legitimate user has ended their session.",
+        "remediation": "Implement server-side session invalidation on logout. Set session token expiry to 30 minutes of inactivity. Use the Secure and HttpOnly flags on session cookies to prevent interception and JavaScript access."
+      }
+    ]
+  },
+  {
+    "scan_date": "2026-05-06",
+    "target": { "host": "192.168.1.25", "port": 3306 },
+    "vulnerabilities": [
+      {
+        "id": "DB-2026-001",
+        "name": "MySQL Database Exposed on Public Interface",
+        "severity": "critical",
+        "cvss": 9.1,
+        "description": "The MySQL database server is listening on all network interfaces including the public-facing interface. Any host that can reach this server on port 3306 can attempt authentication directly against the database. Default MySQL accounts with weak or no passwords were found. Root login from remote hosts is permitted.",
+        "remediation": "Bind MySQL to localhost only: set bind-address=127.0.0.1 in my.cnf. Disable remote root login. Audit all database accounts and remove or lock unused accounts. Implement a firewall rule to block external access to port 3306."
+      },
+      {
+        "id": "DB-2026-002",
+        "name": "Weak MySQL Account Passwords",
+        "severity": "high",
+        "cvss": 8.0,
+        "description": "Database account audit reveals multiple accounts with weak passwords: user 'backup' with password 'backup123', user 'report' with password 'report', and user 'test' with no password. These accounts have SELECT privileges on all databases including tables containing trainee personal information.",
+        "remediation": "Enforce minimum password length of 12 characters with complexity requirements. Remove the test account with no password immediately. Implement MySQL password validation plugin. Review and reduce privileges for each account to minimum required."
+      }
+    ]
+  }
+]

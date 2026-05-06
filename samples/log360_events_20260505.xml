@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ManageEngine Log360 - Event Log Export                  -->
+<!-- Organization : NYK-FIL Maritime E Training Inc.         -->
+<!-- Export Range : 2026-05-05 00:00:00 to 2026-05-05 23:59  -->
+<!-- Report ID    : LOG360-NYKFIL-20260505                   -->
+<Events>
+
+  <!-- Windows Security Event 4625 - Failed Logon -->
+  <Event>
+    <EventID>4625</EventID>
+    <Timestamp>2026-05-05T08:14:32</Timestamp>
+    <SourceHost>192.168.1.10</SourceHost>
+    <EventType>Authentication Failure</EventType>
+    <Severity>High</Severity>
+    <User>admin</User>
+    <Description>Account failed to log on. Logon Type: 3 (Network). Failure Reason: Unknown username or bad password. Source IP: 203.0.113.42 (external). Failure count: 47 attempts in 5 minutes. Possible brute force attack against the e-training portal admin account.</Description>
+  </Event>
+
+  <!-- Windows Security Event 4625 - Failed Logon repeated -->
+  <Event>
+    <EventID>4625</EventID>
+    <Timestamp>2026-05-05T08:15:10</Timestamp>
+    <SourceHost>192.168.1.10</SourceHost>
+    <EventType>Authentication Failure</EventType>
+    <Severity>High</Severity>
+    <User>administrator</User>
+    <Description>Account failed to log on. Logon Type: 3 (Network). Failure Reason: Unknown username or bad password. Source IP: 203.0.113.42 (external). Same external IP targeting default administrator account after admin account lockout triggered.</Description>
+  </Event>
+
+  <!-- Windows Security Event 4672 - Privilege Escalation -->
+  <Event>
+    <EventID>4672</EventID>
+    <Timestamp>2026-05-05T09:02:45</Timestamp>
+    <SourceHost>192.168.1.20</SourceHost>
+    <EventType>Privilege Escalation</EventType>
+    <Severity>Critical</Severity>
+    <User>jdoe</User>
+    <Description>Special privileges assigned to new logon. User jdoe was granted SeDebugPrivilege and SeTcbPrivilege — privileges typically reserved for SYSTEM-level processes. This account is a standard trainee account with no administrative role. Possible token impersonation or local privilege escalation exploit.</Description>
+  </Event>
+
+  <!-- Windows Security Event 4688 - Suspicious Process Creation -->
+  <Event>
+    <EventID>4688</EventID>
+    <Timestamp>2026-05-05T09:05:17</Timestamp>
+    <SourceHost>192.168.1.20</SourceHost>
+    <EventType>Suspicious Process</EventType>
+    <Severity>High</Severity>
+    <User>jdoe</User>
+    <Description>New process created: cmd.exe spawned by w3wp.exe (IIS worker process). Command line: cmd.exe /c whoami &amp;&amp; net user &amp;&amp; ipconfig /all. A web process spawning a command shell is a strong indicator of webshell execution or remote code injection. Investigate immediately.</Description>
+  </Event>
+
+  <!-- Windows Security Event 4740 - Account Lockout -->
+  <Event>
+    <EventID>4740</EventID>
+    <Timestamp>2026-05-05T08:16:00</Timestamp>
+    <SourceHost>192.168.1.5</SourceHost>
+    <EventType>Account Lockout</EventType>
+    <Severity>Medium</Severity>
+    <User>admin</User>
+    <Description>User account admin was locked out on domain controller DC01. Caller computer name: 192.168.1.10. The account was locked after exceeding the maximum failed logon threshold (5 attempts). Triggered by the brute force activity observed at 08:14.</Description>
+  </Event>
+
+  <!-- Windows Security Event 4648 - Explicit Credential Logon -->
+  <Event>
+    <EventID>4648</EventID>
+    <Timestamp>2026-05-05T09:10:22</Timestamp>
+    <SourceHost>192.168.1.20</SourceHost>
+    <EventType>Unauthorized Access</EventType>
+    <Severity>High</Severity>
+    <User>jdoe</User>
+    <Description>A logon was attempted using explicit credentials. User jdoe used net use to map a drive to \\192.168.1.5\ADMIN$ (domain controller admin share) using alternate credentials. This lateral movement attempt indicates the attacker may have obtained domain credentials.</Description>
+  </Event>
+
+  <!-- Windows Security Event 4698 - Scheduled Task Created -->
+  <Event>
+    <EventID>4698</EventID>
+    <Timestamp>2026-05-05T09:18:55</Timestamp>
+    <SourceHost>192.168.1.20</SourceHost>
+    <EventType>Persistence Attempt</EventType>
+    <Severity>Critical</Severity>
+    <User>jdoe</User>
+    <Description>A scheduled task was created. Task Name: \Microsoft\Windows\UpdateCheck. Action: powershell.exe -enc [base64 encoded payload]. This task is not part of any authorized software deployment. Base64-encoded PowerShell in a scheduled task is a common persistence and C2 beacon technique.</Description>
+  </Event>
+
+  <!-- Windows Security Event 4663 - Unauthorized File Access -->
+  <Event>
+    <EventID>4663</EventID>
+    <Timestamp>2026-05-05T10:30:44</Timestamp>
+    <SourceHost>192.168.1.5</SourceHost>
+    <EventType>Unauthorized Access</EventType>
+    <Severity>High</Severity>
+    <User>msmith</User>
+    <Description>Attempt to access object. Object: C:\Users\All Users\Application Data\Microsoft\Windows\WER\. Access: ReadData. User msmith does not have authorized access to this directory. Multiple access attempts to sensitive system directories detected within a 10-minute window.</Description>
+  </Event>
+
+  <!-- Syslog - Firewall Policy Violation -->
+  <Event>
+    <EventID>FW-4001</EventID>
+    <Timestamp>2026-05-05T11:45:00</Timestamp>
+    <SourceHost>192.168.1.1</SourceHost>
+    <EventType>Policy Violation</EventType>
+    <Severity>Medium</Severity>
+    <User>system</User>
+    <Description>Firewall policy violation detected. Outbound connection blocked from 192.168.1.20 to 45.33.32.156:4444 (known Metasploit default port). Traffic matched threat intel feed for command-and-control (C2) communication. Connection originated from IIS worker process on the API gateway server.</Description>
+  </Event>
+
+  <!-- Windows Security Event 1102 - Audit Log Cleared -->
+  <Event>
+    <EventID>1102</EventID>
+    <Timestamp>2026-05-05T12:01:33</Timestamp>
+    <SourceHost>192.168.1.20</SourceHost>
+    <EventType>Log Tampering</EventType>
+    <Severity>Critical</Severity>
+    <User>jdoe</User>
+    <Description>The audit log was cleared. Subject Account Name: jdoe. This event indicates an attempt to cover attack tracks by wiping the Security event log on the compromised API gateway server. Log clearing following privilege escalation and lateral movement is a strong indicator of an active intrusion.</Description>
+  </Event>
+
+</Events>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- F5 Web Application Scanner - Vulnerability Report Export -->
+<!-- Organization : NYK-FIL Maritime E Training Inc.         -->
+<!-- Scan Date    : 2026-05-05                               -->
+<!-- Report ID    : NYKFIL-2026-0505-001                     -->
+<ScanResults>
+
+  <!-- Target: E-Training Web Portal -->
+  <Scan>
+    <ScanDate>2026-05-05</ScanDate>
+    <Target>
+      <Host>192.168.1.10</Host>
+      <Port>443</Port>
+    </Target>
+    <Vulnerabilities>
+
+      <Vulnerability>
+        <ID>CVE-2024-23113</ID>
+        <Name>Unauthenticated Remote Code Execution via Format String</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>The SSL-VPN endpoint on the e-training portal accepts externally-controlled format string data through the fgfmd daemon. An unauthenticated remote attacker can exploit this to execute arbitrary commands on the underlying host. Active exploitation observed in the wild as of Q1 2024.</Description>
+        <Remediation>Apply vendor patch immediately. Upgrade affected firmware to version 7.4.3 or later. Disable SSL-VPN on the public-facing interface if patching cannot be done within 24 hours.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2024-21762</ID>
+        <Name>SQL Injection in Login Authentication Endpoint</Name>
+        <Severity>High</Severity>
+        <CVSS>8.1</CVSS>
+        <Description>The /auth/login endpoint fails to sanitize the username field before passing it to the database query. Time-based blind SQL injection confirmed — attacker can enumerate tables and extract password hashes without a valid account. No authentication required to exploit.</Description>
+        <Remediation>Replace dynamic SQL with parameterized queries. Enforce input validation on all authentication fields. Apply web application firewall rule to block SQL metacharacter sequences in login parameters.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2023-44487</ID>
+        <Name>HTTP/2 Rapid Reset Denial of Service</Name>
+        <Severity>High</Severity>
+        <CVSS>7.5</CVSS>
+        <Description>The web server is vulnerable to the HTTP/2 Rapid Reset attack. An attacker sends a flood of HEADERS frames immediately followed by RST_STREAM frames, causing the server to exhaust CPU resources processing resets. Can take the training portal offline without volumetric traffic.</Description>
+        <Remediation>Limit concurrent HTTP/2 streams per client connection. Update server software to a version with Rapid Reset mitigations. Configure rate limiting at the load balancer level.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2024-1234</ID>
+        <Name>Reflected Cross-Site Scripting in Course Search</Name>
+        <Severity>Medium</Severity>
+        <CVSS>6.1</CVSS>
+        <Description>The course search feature at /courses/search?q= reflects unsanitized user input back into the HTML response. A crafted URL sent to an authenticated trainee can execute arbitrary JavaScript in their browser, enabling session token theft and account takeover.</Description>
+        <Remediation>HTML-encode all user-supplied output before rendering. Implement a Content-Security-Policy header that restricts inline script execution. Enable XSS filter in web application firewall policy.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>TLS-2026-001</ID>
+        <Name>Deprecated TLS 1.0 and 1.1 Protocols Accepted</Name>
+        <Severity>Medium</Severity>
+        <CVSS>5.3</CVSS>
+        <Description>The server negotiates TLS 1.0 and TLS 1.1 connections, both deprecated under RFC 8996. These versions are susceptible to POODLE and BEAST attacks. Cipher suite analysis also confirms weak 3DES and RC4 ciphers are offered during handshake.</Description>
+        <Remediation>Disable TLS 1.0 and TLS 1.1 in server SSL configuration. Set minimum accepted version to TLS 1.2 and prefer TLS 1.3. Remove 3DES and RC4 from the cipher suite list.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>HDR-2026-001</ID>
+        <Name>Missing HTTP Security Headers</Name>
+        <Severity>Low</Severity>
+        <CVSS>3.1</CVSS>
+        <Description>HTTP responses are missing Strict-Transport-Security (HSTS) and X-Frame-Options headers. Without HSTS, browsers may connect over plain HTTP on first visit. Without X-Frame-Options, the portal login page can be embedded in a malicious iframe for clickjacking attacks.</Description>
+        <Remediation>Add Strict-Transport-Security: max-age=31536000; includeSubDomains to all HTTPS responses. Set X-Frame-Options: DENY. Add X-Content-Type-Options: nosniff and Referrer-Policy: no-referrer.</Remediation>
+      </Vulnerability>
+
+    </Vulnerabilities>
+  </Scan>
+
+  <!-- Target: Internal API Gateway -->
+  <Scan>
+    <ScanDate>2026-05-05</ScanDate>
+    <Target>
+      <Host>192.168.1.20</Host>
+      <Port>8443</Port>
+    </Target>
+    <Vulnerabilities>
+
+      <Vulnerability>
+        <ID>CVE-2024-4577</ID>
+        <Name>PHP CGI Remote Code Execution via Argument Injection</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>A critical argument injection flaw in PHP CGI mode allows an unauthenticated attacker to pass arguments directly to the PHP binary via crafted query strings. Confirmed remote code execution on the internal API gateway host running PHP 8.1.12. No user interaction required.</Description>
+        <Remediation>Upgrade PHP to version 8.1.29, 8.2.20, or 8.3.8 immediately. If upgrade is not possible within 72 hours, switch from CGI to PHP-FPM. Deploy WAF rule blocking CVE-2024-4577 query string patterns.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2023-50164</ID>
+        <Name>Apache Struts Path Traversal via File Upload</Name>
+        <Severity>High</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>The document upload feature on the API gateway uses a vulnerable version of Apache Struts. Manipulating the filename parameter in multipart upload requests allows an attacker to write files to arbitrary paths on the server, enabling webshell deployment.</Description>
+        <Remediation>Upgrade Apache Struts to 6.3.0.2 or later. Restrict the upload directory with OS-level permissions. Validate and sanitize all file upload parameters server-side before processing.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>API-2026-001</ID>
+        <Name>Unauthenticated Exposure of Internal API Endpoints</Name>
+        <Severity>Medium</Severity>
+        <CVSS>5.8</CVSS>
+        <Description>Endpoints /api/v1/users and /api/v1/reports are accessible without authentication. These return full user account lists including email addresses and training completion records. Any host on the internal network can query these endpoints without credentials.</Description>
+        <Remediation>Apply authentication middleware to all API endpoints. Require OAuth2 bearer tokens for /api/v1/* routes. Conduct a full API inventory to identify other unauthenticated endpoints.</Remediation>
+      </Vulnerability>
+
+    </Vulnerabilities>
+  </Scan>
+
+</ScanResults>

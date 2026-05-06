@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- F5 Web Application Scanner - Vulnerability Report Export -->
+<!-- Organization : NYK-FIL Maritime E Training Inc.         -->
+<!-- Scan Date    : 2026-05-06                               -->
+<!-- Report ID    : NYKFIL-2026-0506-002                     -->
+<ScanResults>
+
+  <!-- Target: Admin Portal -->
+  <Scan>
+    <ScanDate>2026-05-06</ScanDate>
+    <Target>
+      <Host>192.168.1.30</Host>
+      <Port>8080</Port>
+    </Target>
+    <Vulnerabilities>
+
+      <Vulnerability>
+        <ID>CVE-2024-6387</ID>
+        <Name>OpenSSH Remote Code Execution (regreSSHion)</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>A signal handler race condition in OpenSSH server (sshd) allows unauthenticated remote code execution as root on glibc-based Linux systems. The vulnerability affects OpenSSH versions before 4.4p1 and from 8.5p1 up to but not including 9.8p1. Confirmed on the admin portal server running OpenSSH 9.2p1.</Description>
+        <Remediation>Upgrade OpenSSH to version 9.8p1 or later immediately. As a temporary mitigation, set LoginGraceTime to 0 in sshd_config and restart the SSH service. This eliminates the vulnerability but may expose the server to denial of service.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2024-3400</ID>
+        <Name>PAN-OS Command Injection in GlobalProtect Gateway</Name>
+        <Severity>Critical</Severity>
+        <CVSS>10.0</CVSS>
+        <Description>A command injection vulnerability in the GlobalProtect feature of Palo Alto Networks PAN-OS software allows an unauthenticated attacker to execute arbitrary code with root privileges on the firewall. This vulnerability is being actively exploited in the wild. Evidence of exploitation detected in gateway access logs.</Description>
+        <Remediation>Apply PAN-OS hotfix immediately. Enable Threat Prevention signatures 95187 and 95189. If patching is not possible, temporarily disable the GlobalProtect gateway. Review gateway logs for indicators of compromise.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2024-27198</ID>
+        <Name>JetBrains TeamCity Authentication Bypass</Name>
+        <Severity>High</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>An authentication bypass vulnerability in JetBrains TeamCity allows a remote unauthenticated attacker to perform admin actions including creating new admin users and executing code on the server. The admin portal's CI/CD pipeline component is affected.</Description>
+        <Remediation>Upgrade TeamCity to version 2023.11.4 or later. Apply security patch available from JetBrains. Restrict TeamCity access to internal network only using firewall rules.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2023-48788</ID>
+        <Name>Fortinet FortiClientEMS SQL Injection</Name>
+        <Severity>High</Severity>
+        <CVSS>9.3</CVSS>
+        <Description>An improper neutralization of special elements in SQL commands in Fortinet FortiClientEMS allows an unauthenticated attacker to execute unauthorized code or commands via specially crafted requests to the database management port. No authentication required to exploit.</Description>
+        <Remediation>Upgrade FortiClientEMS to version 7.2.3 or later. Apply vendor advisory FG-IR-24-007. Restrict access to management ports to trusted IP ranges only.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2024-1709</ID>
+        <Name>ConnectWise ScreenConnect Authentication Bypass</Name>
+        <Severity>High</Severity>
+        <CVSS>10.0</CVSS>
+        <Description>An authentication bypass vulnerability in ConnectWise ScreenConnect allows unauthenticated users to create administrator accounts and take full control of the remote access tool. This is being actively exploited for ransomware deployment.</Description>
+        <Remediation>Upgrade ScreenConnect to version 23.9.8 or later immediately. If patching is not possible, take the ScreenConnect instance offline. Review all recent remote sessions for unauthorized access.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CONF-2026-001</ID>
+        <Name>Sensitive Configuration Files Exposed via Web</Name>
+        <Severity>Medium</Severity>
+        <CVSS>6.5</CVSS>
+        <Description>The admin portal exposes configuration files including database.yml and application.properties via direct URL access without authentication. These files contain database credentials, API keys, and internal service endpoints accessible to any user.</Description>
+        <Remediation>Configure the web server to deny access to configuration file extensions (.yml, .properties, .conf, .ini). Move sensitive configuration outside the web root directory. Rotate all exposed credentials immediately.</Remediation>
+      </Vulnerability>
+
+    </Vulnerabilities>
+  </Scan>
+
+  <!-- Target: File Server -->
+  <Scan>
+    <ScanDate>2026-05-06</ScanDate>
+    <Target>
+      <Host>192.168.1.5</Host>
+      <Port>445</Port>
+    </Target>
+    <Vulnerabilities>
+
+      <Vulnerability>
+        <ID>CVE-2017-0144</ID>
+        <Name>EternalBlue SMB Remote Code Execution (MS17-010)</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>The file server is running an unpatched version of Windows SMBv1 vulnerable to EternalBlue. This vulnerability was used in the WannaCry and NotPetya ransomware attacks. An unauthenticated attacker on the same network can achieve remote code execution as SYSTEM with no user interaction required.</Description>
+        <Remediation>Apply Microsoft security update MS17-010 immediately. Disable SMBv1 protocol via PowerShell: Set-SmbServerConfiguration -EnableSMB1Protocol $false. Block inbound SMB traffic at the network perimeter (port 445).</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2020-0796</ID>
+        <Name>SMBGhost - Windows SMBv3 Remote Code Execution</Name>
+        <Severity>Critical</Severity>
+        <CVSS>10.0</CVSS>
+        <Description>A remote code execution vulnerability exists in the way Microsoft Server Message Block 3.1.1 (SMBv3) protocol handles certain requests. Exploitation allows unauthenticated code execution. The file server is running Windows 10 version 1903 without the March 2020 cumulative update.</Description>
+        <Remediation>Install cumulative update KB4551762 immediately. As a workaround, disable SMBv3 compression: Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters DisableCompression -Type DWORD -Value 1.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>SHARE-2026-001</ID>
+        <Name>Unauthenticated Network Share Access</Name>
+        <Severity>Medium</Severity>
+        <CVSS>5.5</CVSS>
+        <Description>The file server has several SMB shares accessible without authentication (null session). Shares TRAINING_DOCS and HR_FILES are readable by any user on the network without providing credentials. These shares contain sensitive training materials and HR documents.</Description>
+        <Remediation>Disable null session access in registry. Require authentication for all SMB shares. Review share permissions and apply principle of least privilege — restrict each share to only the users who need access.</Remediation>
+      </Vulnerability>
+
+    </Vulnerabilities>
+  </Scan>
+
+</ScanResults>

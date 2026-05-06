@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip --version)",
+      "Bash(mysql --version)",
+      "PowerShell(Get-WmiObject Win32_Service -Filter \"Name='Grafana'\")",
+      "PowerShell(Get-CimInstance Win32_Service -Filter \"Name='Grafana'\")"
+    ]
+  }
+}

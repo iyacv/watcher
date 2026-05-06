@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ManageEngine Log360 - Event Log Export                  -->
+<!-- Organization : NYK-FIL Maritime E Training Inc.         -->
+<!-- Export Range : 2026-05-06 00:00:00 to 2026-05-06 23:59  -->
+<!-- Report ID    : LOG360-NYKFIL-20260506                   -->
+<Events>
+
+  <!-- Ransomware Indicator - Mass File Rename -->
+  <Event>
+    <EventID>4663</EventID>
+    <Timestamp>2026-05-06T02:14:08</Timestamp>
+    <SourceHost>192.168.1.5</SourceHost>
+    <EventType>Unauthorized Access</EventType>
+    <Severity>Critical</Severity>
+    <User>SYSTEM</User>
+    <Description>Mass file access and rename detected on file server. Over 3,400 files in TRAINING_DOCS share renamed within 90 seconds — extension changed to .locked. This pattern is consistent with ransomware encryption behavior. Originating process: svchost.exe (PID 4892). Immediate isolation of host recommended.</Description>
+  </Event>
+
+  <!-- Windows Security Event 4625 - Brute Force on Admin Portal -->
+  <Event>
+    <EventID>4625</EventID>
+    <Timestamp>2026-05-06T01:45:22</Timestamp>
+    <SourceHost>192.168.1.30</SourceHost>
+    <EventType>Authentication Failure</EventType>
+    <Severity>High</Severity>
+    <User>admin</User>
+    <Description>Brute force attack detected against admin portal. 312 failed login attempts in 8 minutes from IP 185.220.101.47 (Tor exit node). Logon Type 3 (Network). Accounts targeted: admin, administrator, sysadmin, root. Account lockout policy triggered after 5 attempts per account but attacker is rotating accounts.</Description>
+  </Event>
+
+  <!-- Windows Security Event 4720 - New User Created -->
+  <Event>
+    <EventID>4720</EventID>
+    <Timestamp>2026-05-06T01:58:44</Timestamp>
+    <SourceHost>192.168.1.30</SourceHost>
+    <EventType>Unauthorized Access</EventType>
+    <Severity>Critical</Severity>
+    <User>backdoor_svc</User>
+    <Description>New user account created outside of business hours: backdoor_svc. Created by: SYSTEM (no human operator). Account immediately added to Administrators group. This is a strong indicator of successful exploitation — attackers commonly create backdoor accounts after gaining initial access to maintain persistence.</Description>
+  </Event>
+
+  <!-- Windows Security Event 4672 - Privilege Escalation -->
+  <Event>
+    <EventID>4672</EventID>
+    <Timestamp>2026-05-06T02:01:15</Timestamp>
+    <SourceHost>192.168.1.30</SourceHost>
+    <EventType>Privilege Escalation</EventType>
+    <Severity>Critical</Severity>
+    <User>backdoor_svc</User>
+    <Description>Newly created account backdoor_svc logged in and was assigned SeDebugPrivilege, SeTcbPrivilege, and SeBackupPrivilege. These privileges allow reading any file, injecting into any process, and acting as part of the operating system. Full system compromise confirmed.</Description>
+  </Event>
+
+  <!-- Lateral Movement - SMB Connection to File Server -->
+  <Event>
+    <EventID>4648</EventID>
+    <Timestamp>2026-05-06T02:08:33</Timestamp>
+    <SourceHost>192.168.1.5</SourceHost>
+    <EventType>Unauthorized Access</EventType>
+    <Severity>Critical</Severity>
+    <User>backdoor_svc</User>
+    <Description>Explicit credential logon from compromised admin portal (192.168.1.30) to file server (192.168.1.5) using newly created account backdoor_svc. Connected to ADMIN$ share. This confirms lateral movement from the admin portal to the file server — attacker has spread to a second host within 10 minutes of initial compromise.</Description>
+  </Event>
+
+  <!-- Windows Security Event 7045 - Malicious Service Installed -->
+  <Event>
+    <EventID>7045</EventID>
+    <Timestamp>2026-05-06T02:10:01</Timestamp>
+    <SourceHost>192.168.1.5</SourceHost>
+    <EventType>Persistence Attempt</EventType>
+    <Severity>Critical</Severity>
+    <User>backdoor_svc</User>
+    <Description>New service installed on file server: DisplayName=Windows Update Helper, ServiceName=WUHelper, ImagePath=C:\Windows\Temp\svchost32.exe. This is not a legitimate Windows service. Binary located in Temp directory is a common ransomware deployment technique. Service set to start automatically on boot.</Description>
+  </Event>
+
+  <!-- Network - Suspicious Outbound Data Transfer -->
+  <Event>
+    <EventID>FW-5001</EventID>
+    <Timestamp>2026-05-06T02:20:18</Timestamp>
+    <SourceHost>192.168.1.5</SourceHost>
+    <EventType>Policy Violation</EventType>
+    <Severity>High</Severity>
+    <User>system</User>
+    <Description>Large outbound data transfer detected from file server to external IP 91.108.56.130 (registered in Russia). Transfer size: 4.2 GB over port 443 (HTTPS). Duration: 6 minutes. This volume of data leaving the network during off-hours is consistent with data exfiltration prior to ransomware deployment.</Description>
+  </Event>
+
+  <!-- Windows Event 4776 - NTLM Authentication Failure -->
+  <Event>
+    <EventID>4776</EventID>
+    <Timestamp>2026-05-06T03:00:55</Timestamp>
+    <SourceHost>192.168.1.5</SourceHost>
+    <EventType>Authentication Failure</EventType>
+    <Severity>Medium</Severity>
+    <User>msmith</User>
+    <Description>NTLM authentication failure for user msmith attempting to access file server. The account credentials appear to have been changed — legitimate user msmith is unable to log in to their own account. This may indicate the attacker has modified account passwords to lock out legitimate users as part of the ransomware attack.</Description>
+  </Event>
+
+  <!-- Windows Event 104 - System Log Cleared -->
+  <Event>
+    <EventID>104</EventID>
+    <Timestamp>2026-05-06T02:25:40</Timestamp>
+    <SourceHost>192.168.1.30</SourceHost>
+    <EventType>Log Tampering</EventType>
+    <Severity>Critical</Severity>
+    <User>backdoor_svc</User>
+    <Description>System event log cleared on admin portal. Following the System log, the Application and Security logs were also cleared within 30 seconds. Log clearing on all three channels simultaneously is a textbook anti-forensics technique used to destroy evidence of the intrusion before the ransomware payload deploys.</Description>
+  </Event>
+
+  <!-- USB Device Inserted -->
+  <Event>
+    <EventID>6416</EventID>
+    <Timestamp>2026-05-06T09:15:33</Timestamp>
+    <SourceHost>192.168.1.20</SourceHost>
+    <EventType>Policy Violation</EventType>
+    <Severity>Medium</Severity>
+    <User>jdoe</User>
+    <Description>New external storage device connected: SanDisk USB 3.0 (Serial: 4C530001140805116382). Device policy violation — USB storage is restricted on this host per organizational security policy. User jdoe does not have an approved exemption for external storage devices. Possible data exfiltration or unauthorized software introduction.</Description>
+  </Event>
+
+</Events>

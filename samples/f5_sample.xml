@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ScanResults>
+  <Scan>
+    <ScanDate>2026-05-01</ScanDate>
+    <Target>
+      <Host>192.168.1.10</Host>
+      <Port>443</Port>
+    </Target>
+    <Vulnerabilities>
+      <Vulnerability>
+        <ID>CVE-2024-23113</ID>
+        <Name>FortiOS Remote Code Execution</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>A use-after-free vulnerability in FortiOS allows unauthenticated remote code execution.</Description>
+        <Remediation>Update FortiOS to version 7.4.3 or later.</Remediation>
+      </Vulnerability>
+      <Vulnerability>
+        <ID>CVE-2024-1234</ID>
+        <Name>SQL Injection in Login Form</Name>
+        <Severity>High</Severity>
+        <CVSS>7.5</CVSS>
+        <Description>The login endpoint does not sanitize user input, allowing SQL injection attacks.</Description>
+        <Remediation>Use parameterized queries and input validation.</Remediation>
+      </Vulnerability>
+      <Vulnerability>
+        <ID>CVE-2023-9999</ID>
+        <Name>Outdated TLS Version</Name>
+        <Severity>Medium</Severity>
+        <CVSS>5.3</CVSS>
+        <Description>Server accepts TLS 1.0 connections which are considered insecure.</Description>
+        <Remediation>Disable TLS 1.0 and 1.1. Enable TLS 1.2 and 1.3 only.</Remediation>
+      </Vulnerability>
+    </Vulnerabilities>
+  </Scan>
+</ScanResults>

@@ -1,0 +1,19 @@
+# Place this file in: grafana/provisioning/datasources/datasource.yml
+# Grafana will auto-load it on startup.
+
+apiVersion: 1
+
+datasources:
+  - name: CapstoneMySQL
+    type: mysql
+    url: localhost:3306
+    database: capstone_security
+    user: root
+    jsonData:
+      maxOpenConns: 10
+      maxIdleConns: 10
+      connMaxLifetime: 14400
+    secureJsonData:
+      password: ""        # ← fill in your MySQL root password
+    isDefault: true
+    editable: true

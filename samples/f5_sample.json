@@ -1,0 +1,25 @@
+{
+  "scan_date": "2026-05-02",
+  "target": {
+    "host": "192.168.1.30",
+    "port": 80
+  },
+  "vulnerabilities": [
+    {
+      "id": "CVE-2024-5678",
+      "name": "Cross-Site Scripting (XSS) in Search",
+      "severity": "Medium",
+      "cvss": 6.1,
+      "description": "The search parameter reflects unsanitized input allowing stored XSS.",
+      "remediation": "Implement output encoding and Content Security Policy headers."
+    },
+    {
+      "id": "CVE-2024-8888",
+      "name": "Directory Traversal",
+      "severity": "High",
+      "cvss": 8.2,
+      "description": "File download endpoint allows path traversal to read arbitrary files.",
+      "remediation": "Validate and sanitize file path inputs. Use a whitelist of allowed directories."
+    }
+  ]
+}
