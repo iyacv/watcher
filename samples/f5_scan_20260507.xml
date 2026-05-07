@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ScanResults>
+  <Scan>
+    <ScanDate>2026-05-07</ScanDate>
+    <Target>
+      <Host>training-portal.nykfil.local</Host>
+      <Port>443</Port>
+    </Target>
+    <Vulnerabilities>
+      <Vulnerability>
+        <ID>CVE-2026-0451</ID>
+        <Name>Unrestricted File Upload in Certificate Module</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.6</CVSS>
+        <Description>The trainee certificate upload endpoint /api/cert/upload accepts arbitrary file types including .php, .jsp, and .aspx. An attacker can upload a web shell and execute commands as the application user. No content-type or magic-byte validation is performed.</Description>
+        <Remediation>Whitelist allowed extensions to .pdf, .png, .jpg only. Validate file magic bytes server-side. Store uploads outside the web root.</Remediation>
+      </Vulnerability>
+      <Vulnerability>
+        <ID>CVE-2026-0789</ID>
+        <Name>Hard-Coded API Key in Mobile Build</Name>
+        <Severity>High</Severity>
+        <CVSS>7.8</CVSS>
+        <Description>The Android trainee app ships with a hard-coded API key for the certification backend. The key has full read/write privileges and can be extracted by any attacker who decompiles the APK.</Description>
+        <Remediation>Rotate the leaked key immediately. Implement per-user OAuth tokens. Store secrets in the Android Keystore, not in source.</Remediation>
+      </Vulnerability>
+      <Vulnerability>
+        <ID>CVE-2026-1102</ID>
+        <Name>Server-Side Request Forgery in Avatar Importer</Name>
+        <Severity>High</Severity>
+        <CVSS>8.1</CVSS>
+        <Description>The /api/profile/avatar?url= endpoint fetches arbitrary URLs server-side without validation. Attacker can pivot to internal services including the AWS metadata endpoint at 169.254.169.254 and exfiltrate IAM credentials.</Description>
+        <Remediation>Block private IP ranges and link-local addresses. Use an HTTP proxy with an allowlist. Disable IMDSv1 on EC2 instances.</Remediation>
+      </Vulnerability>
+      <Vulnerability>
+        <ID>CVE-2026-1340</ID>
+        <Name>Verbose Error Messages Disclose Stack Traces</Name>
+        <Severity>Medium</Severity>
+        <CVSS>5.4</CVSS>
+        <Description>Production error pages expose full Java stack traces including library versions, file paths, and database driver details. Useful for attacker reconnaissance to identify exploitable framework versions.</Description>
+        <Remediation>Set spring.mvc.problemdetails.enabled=false and configure a generic error page. Log details server-side only.</Remediation>
+      </Vulnerability>
+      <Vulnerability>
+        <ID>CVE-2026-1455</ID>
+        <Name>Weak JWT Signing Algorithm Accepted</Name>
+        <Severity>High</Severity>
+        <CVSS>7.4</CVSS>
+        <Description>The session token validator accepts JWTs signed with the "none" algorithm. Any attacker who obtains a valid token structure can forge tokens for any user including administrators.</Description>
+        <Remediation>Hard-code the expected algorithm to RS256 in jwt.verify() options. Reject any token whose header alg field is "none".</Remediation>
+      </Vulnerability>
+    </Vulnerabilities>
+  </Scan>
+  <Scan>
+    <ScanDate>2026-05-07</ScanDate>
+    <Target>
+      <Host>db-primary.nykfil.local</Host>
+      <Port>3306</Port>
+    </Target>
+    <Vulnerabilities>
+      <Vulnerability>
+        <ID>CVE-2026-0998</ID>
+        <Name>Database Backups Stored Without Encryption</Name>
+        <Severity>High</Severity>
+        <CVSS>7.2</CVSS>
+        <Description>Nightly database dumps are written to /var/backups/db as plain SQL. Files are world-readable and contain trainee PII including passport numbers, dates of birth, and seafarer's identification document numbers.</Description>
+        <Remediation>Encrypt backups with GPG using a dedicated key. Restrict /var/backups/db to root only. Rotate dumps to encrypted offsite storage.</Remediation>
+      </Vulnerability>
+      <Vulnerability>
+        <ID>CVE-2026-2210</ID>
+        <Name>Exposed phpMyAdmin Interface</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.1</CVSS>
+        <Description>phpMyAdmin is reachable at https://db-primary.nykfil.local/pma without IP restriction. Default admin credentials (admin/admin) still functional. Direct database access from any internet-facing host.</Description>
+        <Remediation>Remove phpMyAdmin from the public web root. If needed, bind to localhost only and tunnel via SSH. Force password reset on all DB accounts.</Remediation>
+      </Vulnerability>
+      <Vulnerability>
+        <ID>CVE-2026-2890</ID>
+        <Name>Slow Query Log Contains Plaintext Passwords</Name>
+        <Severity>Medium</Severity>
+        <CVSS>6.5</CVSS>
+        <Description>The MySQL slow query log captures the full text of UPDATE statements that include password hashes and reset tokens. Log file is rotated to /backup with the same world-readable permissions as the database backups.</Description>
+        <Remediation>Disable slow query log in production, or sanitize logged SQL. Move log rotation to an encrypted destination with restricted ACL.</Remediation>
+      </Vulnerability>
+    </Vulnerabilities>
+  </Scan>
+</ScanResults>

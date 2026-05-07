@@ -14,7 +14,7 @@ from watchdog.events import FileSystemEventHandler
 import config
 from parsers.f5_parser import parse_f5
 from parsers.log360_parser import parse_log360
-from pipeline.deduplicator import is_duplicate, mark_seen
+from pipeline.deduplicator import is_duplicate, mark_seen, load_existing_hashes
 from pipeline.prioritizer import prioritize
 from pipeline.correlator import correlate
 from storage.db import insert_vulnerability, insert_event, flag_correlation, get_connection
@@ -44,6 +44,10 @@ def detect_source(filepath: str) -> str:
 
 def process_file(filepath: str):
     path = Path(filepath)
+    # Guard against double-fire from watchdog: another thread may have already
+    # processed and removed the file before we got here.
+    if not os.path.exists(filepath):
+        return
     log.info("Detected new file: %s", path.name)
 
     try:
@@ -61,6 +65,8 @@ def process_file(filepath: str):
         inserted = 0
 
         for record in records:
+            record["source_file"] = path.name
+
             # ── Deduplication ─────────────────────────────────────────────
             if is_duplicate(record):
                 log.debug("Duplicate skipped: %s on %s", record.get("vuln_id"), record.get("host"))
@@ -90,15 +96,24 @@ def process_file(filepath: str):
         conn.close()
         log.info("Inserted %d new records from %s", inserted, path.name)
 
-        # Move to processed
-        dest = Path(config.PROCESSED_DIR) / path.name
-        shutil.move(filepath, dest)
-        log.info("Moved to processed: %s", dest)
+        try:
+            if config.KEEP_PROCESSED:
+                dest = Path(config.PROCESSED_DIR) / path.name
+                shutil.move(filepath, dest)
+                log.info("Moved to processed: %s", dest)
+            else:
+                os.remove(filepath)
+                log.info("Deleted processed file: %s", path.name)
+        except FileNotFoundError:
+            pass
 
     except Exception as exc:
         log.error("Failed to process %s: %s", path.name, exc, exc_info=True)
-        dest = Path(config.FAILED_DIR) / path.name
-        shutil.move(filepath, dest)
+        try:
+            dest = Path(config.FAILED_DIR) / path.name
+            shutil.move(filepath, dest)
+        except FileNotFoundError:
+            pass
 
 
 class InboxHandler(FileSystemEventHandler):
@@ -119,6 +134,18 @@ class InboxHandler(FileSystemEventHandler):
 def main():
     for folder in (config.INBOX_DIR, config.PROCESSED_DIR, config.FAILED_DIR):
         os.makedirs(folder, exist_ok=True)
+
+    # Pre-load known hashes from the DB so restarts don't try to re-insert
+    conn = get_connection()
+    load_existing_hashes(conn)
+    conn.close()
+
+    # Process any files left in the inbox before we started watching
+    pending = [p for p in Path(config.INBOX_DIR).iterdir() if p.is_file()]
+    if pending:
+        log.info("Found %d file(s) waiting in inbox; processing before watching.", len(pending))
+        for p in pending:
+            process_file(str(p))
 
     log.info("Watching inbox: %s", config.INBOX_DIR)
     handler = InboxHandler()

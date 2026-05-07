@@ -15,16 +15,16 @@ from datetime import datetime, timedelta, timezone
 import config
 
 # Log360 event types that suggest active exploitation
-_SUSPICIOUS_EVENTS = {
-    "authentication failure",
-    "brute force",
-    "privilege escalation",
-    "unauthorized access",
-    "suspicious login",
-    "malware detected",
-    "lateral movement",
-    "data exfiltration",
-}
+#_SUSPICIOUS_EVENTS = {
+      #  "authentication failure",
+       # "brute force",
+        #"privilege escalation",
+        #"unauthorized access",
+        #"suspicious login",
+        #"malware detected",
+        #"lateral movement",
+        #"data exfiltration",
+#}
 
 
 def _parse_dt(ts: str) -> datetime:
@@ -45,7 +45,7 @@ def correlate(conn, record: dict) -> dict | None:
     ts     = _parse_dt(record.get("detected_at", ""))
     window = timedelta(minutes=config.CORRELATION_WINDOW_MINUTES)
 
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
 
     if source == "f5":
         # New F5 vuln → look for matching suspicious Log360 event on same host
@@ -53,11 +53,11 @@ def correlate(conn, record: dict) -> dict | None:
             """
             SELECT event_id, event_type, detected_at
             FROM events
-            WHERE host = %s
+            WHERE host = ?
               AND LOWER(event_type) IN ({placeholders})
-              AND detected_at BETWEEN %s AND %s
+              AND detected_at BETWEEN ? AND ?
             LIMIT 1
-            """.format(placeholders=",".join(["%s"] * len(_SUSPICIOUS_EVENTS))),
+            """.format(placeholders=",".join(["?"] * len(_SUSPICIOUS_EVENTS))),
             (host, *_SUSPICIOUS_EVENTS,
              (ts - window).strftime("%Y-%m-%d %H:%M:%S"),
              (ts + window).strftime("%Y-%m-%d %H:%M:%S")),
@@ -86,8 +86,8 @@ def correlate(conn, record: dict) -> dict | None:
             """
             SELECT vuln_id, severity, detected_at
             FROM vulnerabilities
-            WHERE host = %s
-              AND detected_at BETWEEN %s AND %s
+            WHERE host = ?
+              AND detected_at BETWEEN ? AND ?
             ORDER BY severity DESC
             LIMIT 1
             """,

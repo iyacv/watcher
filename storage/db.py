@@ -1,29 +1,28 @@
-import mysql.connector
+import sqlite3
 import config
 
 
 def get_connection():
-    return mysql.connector.connect(
-        host     = config.DB_HOST,
-        port     = config.DB_PORT,
-        database = config.DB_NAME,
-        user     = config.DB_USER,
-        password = config.DB_PASSWORD,
-    )
+    conn = sqlite3.connect(config.DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    return conn
 
 
 def insert_vulnerability(conn, r: dict) -> int:
     sql = """
         INSERT INTO vulnerabilities
           (host, port, vuln_id, name, severity, cvss,
-           description, remediation, detected_at, raw_hash, status, aged)
+           description, remediation, detected_at, raw_hash, status, aged,
+           source_file)
         VALUES
-          (%(host)s, %(port)s, %(vuln_id)s, %(name)s, %(severity)s, %(cvss)s,
-           %(description)s, %(remediation)s, %(detected_at)s, %(raw_hash)s,
-           %(status)s, %(aged)s)
+          (:host, :port, :vuln_id, :name, :severity, :cvss,
+           :description, :remediation, :detected_at, :raw_hash,
+           :status, :aged, :source_file)
     """
     r.setdefault("aged", False)
     r.setdefault("status", "open")
+    r.setdefault("source_file", None)
     cursor = conn.cursor()
     cursor.execute(sql, r)
     conn.commit()
@@ -36,11 +35,12 @@ def insert_event(conn, r: dict) -> int:
     sql = """
         INSERT INTO events
           (host, event_id, event_type, severity, user,
-           description, detected_at, raw_hash)
+           description, detected_at, raw_hash, source_file)
         VALUES
-          (%(host)s, %(event_id)s, %(event_type)s, %(severity)s, %(user)s,
-           %(description)s, %(detected_at)s, %(raw_hash)s)
+          (:host, :event_id, :event_type, :severity, :user,
+           :description, :detected_at, :raw_hash, :source_file)
     """
+    r.setdefault("source_file", None)
     cursor = conn.cursor()
     cursor.execute(sql, r)
     conn.commit()
@@ -54,9 +54,9 @@ def flag_correlation(conn, c: dict):
         INSERT INTO correlations
           (host, vuln_id, event_id, event_type, vuln_time, event_time, severity)
         VALUES
-          (%(host)s, %(vuln_id)s, %(event_id)s, %(event_type)s,
-           %(vuln_time)s, %(event_time)s, %(severity)s)
-        ON DUPLICATE KEY UPDATE severity = %(severity)s
+          (:host, :vuln_id, :event_id, :event_type,
+           :vuln_time, :event_time, :severity)
+        ON CONFLICT(host, vuln_id, event_id) DO UPDATE SET severity = excluded.severity
     """
     cursor = conn.cursor()
     cursor.execute(sql, c)

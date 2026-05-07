@@ -1,254 +1,1083 @@
 {
-  "title": "NYK-FIL Security Monitoring",
-  "uid": "capstone-security",
-  "schemaVersion": 38,
-  "version": 3,
-  "refresh": "30s",
-  "time": { "from": "now-7d", "to": "now" },
-  "templating": {
+  "annotations": {
     "list": [
       {
-        "type": "datasource",
-        "name": "datasource",
-        "label": "MySQL Source",
-        "pluginId": "mysql",
-        "current": {},
-        "hide": 0
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
       }
     ]
   },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
   "panels": [
-
     {
-      "id": 1,
-      "title": "Total Logs",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 5, "x": 0, "y": 0 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "options": {
-        "colorMode": "background",
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": 0 }] }
-      },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT (SELECT COUNT(*) FROM vulnerabilities) + (SELECT COUNT(*) FROM events) AS value",
-        "format": "table",
-        "refId": "A"
-      }]
-    },
-
-    {
-      "id": 2,
-      "title": "Critical",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 5, "x": 5, "y": 0 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "options": {
-        "colorMode": "background",
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "thresholds": { "mode": "absolute", "steps": [{ "color": "dark-red", "value": 0 }] }
-      },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='critical' UNION ALL SELECT COUNT(*) FROM events WHERE severity='critical') t",
-        "format": "table",
-        "refId": "A"
-      }]
-    },
-
-    {
-      "id": 3,
-      "title": "High",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 5, "x": 10, "y": 0 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "options": {
-        "colorMode": "background",
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": 0 }] }
-      },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='high' UNION ALL SELECT COUNT(*) FROM events WHERE severity='high') t",
-        "format": "table",
-        "refId": "A"
-      }]
-    },
-
-    {
-      "id": 4,
-      "title": "Medium",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 5, "x": 15, "y": 0 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "options": {
-        "colorMode": "background",
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "thresholds": { "mode": "absolute", "steps": [{ "color": "yellow", "value": 0 }] }
-      },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='medium' UNION ALL SELECT COUNT(*) FROM events WHERE severity='medium') t",
-        "format": "table",
-        "refId": "A"
-      }]
-    },
-
-    {
-      "id": 5,
-      "title": "Low",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "options": {
-        "colorMode": "background",
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }] }
-      },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='low' UNION ALL SELECT COUNT(*) FROM events WHERE severity='low') t",
-        "format": "table",
-        "refId": "A"
-      }]
-    },
-
-    {
-      "id": 6,
-      "title": "Top Recurring Issues (F5 Vulnerabilities)",
-      "type": "piechart",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "options": {
-        "pieType": "pie",
-        "displayLabels": ["name", "percent"],
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "values": ["value", "percent"]
-        },
-        "tooltip": { "mode": "single" }
-      },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT name AS 'Vulnerability', COUNT(*) AS 'count' FROM vulnerabilities GROUP BY name ORDER BY count DESC LIMIT 8",
-        "format": "table",
-        "refId": "A"
-      }]
-    },
-
-    {
-      "id": 7,
-      "title": "Top Recurring Events (Log360)",
-      "type": "piechart",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "options": {
-        "pieType": "pie",
-        "displayLabels": ["name", "percent"],
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "values": ["value", "percent"]
-        },
-        "tooltip": { "mode": "single" }
-      },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT event_type AS 'Event Type', COUNT(*) AS 'count' FROM events GROUP BY event_type ORDER BY count DESC LIMIT 8",
-        "format": "table",
-        "refId": "A"
-      }]
-    },
-
-    {
-      "id": 8,
-      "title": "Severity Breakdown",
-      "type": "piechart",
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "options": {
-        "pieType": "pie",
-        "displayLabels": ["name", "percent"],
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "values": ["value", "percent"]
-        }
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
       },
       "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "blue",
+              "value": 0
+            }
+          ]
+        },
+        "wideLayout": true
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT (SELECT COUNT(*) FROM vulnerabilities) + (SELECT COUNT(*) FROM events) AS value",
+          "queryType": "table",
+          "rawQueryText": "SELECT (SELECT COUNT(*) FROM vulnerabilities) + (SELECT COUNT(*) FROM events) AS value",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
+      "title": "Total Logs",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "dark-red",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 5,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "dark-red",
+              "value": 0
+            }
+          ]
+        },
+        "wideLayout": true
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='critical' UNION ALL SELECT COUNT(*) FROM events WHERE severity='critical') t",
+          "queryType": "table",
+          "rawQueryText": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='critical' UNION ALL SELECT COUNT(*) FROM events WHERE severity='critical') t",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
+      "title": "Critical",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#e16e7b",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 10,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "orange",
+              "value": 0
+            }
+          ]
+        },
+        "wideLayout": true
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='high' UNION ALL SELECT COUNT(*) FROM events WHERE severity='high') t",
+          "queryType": "table",
+          "rawQueryText": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='high' UNION ALL SELECT COUNT(*) FROM events WHERE severity='high') t",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
+      "title": "High",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "semi-dark-orange",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 15,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "yellow",
+              "value": 0
+            }
+          ]
+        },
+        "wideLayout": true
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='medium' UNION ALL SELECT COUNT(*) FROM events WHERE severity='medium') t",
+          "queryType": "table",
+          "rawQueryText": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='medium' UNION ALL SELECT COUNT(*) FROM events WHERE severity='medium') t",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
+      "title": "Medium",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "green",
+              "value": 0
+            }
+          ]
+        },
+        "wideLayout": true
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='low' UNION ALL SELECT COUNT(*) FROM events WHERE severity='low') t",
+          "queryType": "table",
+          "rawQueryText": "SELECT SUM(cnt) AS value FROM (SELECT COUNT(*) cnt FROM vulnerabilities WHERE severity='low' UNION ALL SELECT COUNT(*) FROM events WHERE severity='low') t",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
+      "title": "Low",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "id": 6,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.5,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT name AS \"Vulnerability\", COUNT(*) AS count FROM vulnerabilities GROUP BY name ORDER BY count DESC LIMIT 10",
+          "queryType": "table",
+          "rawQueryText": "SELECT name AS \"Vulnerability\", COUNT(*) AS count FROM vulnerabilities GROUP BY name ORDER BY count DESC LIMIT 10",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
+      "title": "Top Recurring Issues (F5 Vulnerabilities)",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "id": 7,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.5,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT event_type AS \"Event Type\", COUNT(*) AS count FROM events GROUP BY event_type ORDER BY count DESC LIMIT 10",
+          "queryType": "table",
+          "rawQueryText": "SELECT event_type AS \"Event Type\", COUNT(*) AS count FROM events GROUP BY event_type ORDER BY count DESC LIMIT 10",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
+      "title": "Top Recurring Events (Log360)",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
         "overrides": [
-          { "matcher": { "id": "byName", "options": "Critical" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "dark-red" } }] },
-          { "matcher": { "id": "byName", "options": "High" },     "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }] },
-          { "matcher": { "id": "byName", "options": "Medium" },   "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } }] },
-          { "matcher": { "id": "byName", "options": "Low" },      "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }] },
-          { "matcher": { "id": "byName", "options": "Info" },     "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] }
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Critical"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "High"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Medium"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Low"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Info"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
         ]
       },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT SUM(CASE WHEN severity='critical' THEN 1 ELSE 0 END) AS 'Critical', SUM(CASE WHEN severity='high' THEN 1 ELSE 0 END) AS 'High', SUM(CASE WHEN severity='medium' THEN 1 ELSE 0 END) AS 'Medium', SUM(CASE WHEN severity='low' THEN 1 ELSE 0 END) AS 'Low', SUM(CASE WHEN severity='info' THEN 1 ELSE 0 END) AS 'Info' FROM vulnerabilities",
-        "format": "table",
-        "refId": "A"
-      }]
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 12
+      },
+      "id": 8,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "sort": "desc",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT SUM(CASE WHEN severity='critical' THEN 1 ELSE 0 END) AS \"Critical\", SUM(CASE WHEN severity='high' THEN 1 ELSE 0 END) AS \"High\", SUM(CASE WHEN severity='medium' THEN 1 ELSE 0 END) AS \"Medium\", SUM(CASE WHEN severity='low' THEN 1 ELSE 0 END) AS \"Low\", SUM(CASE WHEN severity='info' THEN 1 ELSE 0 END) AS \"Info\" FROM vulnerabilities",
+          "queryType": "table",
+          "rawQueryText": "SELECT SUM(CASE WHEN severity='critical' THEN 1 ELSE 0 END) AS \"Critical\", SUM(CASE WHEN severity='high' THEN 1 ELSE 0 END) AS \"High\", SUM(CASE WHEN severity='medium' THEN 1 ELSE 0 END) AS \"Medium\", SUM(CASE WHEN severity='low' THEN 1 ELSE 0 END) AS \"Low\", SUM(CASE WHEN severity='info' THEN 1 ELSE 0 END) AS \"Info\" FROM vulnerabilities",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
+      "title": "Severity Breakdown",
+      "type": "piechart"
     },
-
     {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 8,
+        "y": 12
+      },
       "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT CAST(strftime('%s', substr(detected_at, 1, 10)) AS INTEGER) AS time, COUNT(*) AS value FROM vulnerabilities GROUP BY substr(detected_at, 1, 10) ORDER BY time",
+          "queryType": "time series",
+          "rawQueryText": "SELECT CAST(strftime('%s', substr(detected_at, 1, 10)) AS INTEGER) AS time, COUNT(*) AS value FROM vulnerabilities GROUP BY substr(detected_at, 1, 10) ORDER BY time",
+          "refId": "A",
+          "timeColumns": [
+            "time"
+          ]
+        }
+      ],
       "title": "Vulnerabilities Over Time",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 12 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT DATE(detected_at) AS time, COUNT(*) AS value FROM vulnerabilities WHERE $__timeFilter(detected_at) GROUP BY DATE(detected_at) ORDER BY time",
-        "format": "time_series",
-        "refId": "A"
-      }]
+      "type": "timeseries"
     },
-
     {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Vulnerability"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 420
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 114
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CVSS"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 141
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
       "id": 10,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT source_file AS \"Source File\", host AS \"Host\", vuln_id AS \"CVE / ID\", name AS \"Vulnerability\", severity AS \"Severity\", cvss AS \"CVSS\", status AS \"Status\", detected_at AS \"Detected\" FROM vulnerabilities ORDER BY CASE severity WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 WHEN 'low' THEN 4 WHEN 'info' THEN 5 ELSE 6 END, detected_at DESC LIMIT 200",
+          "queryType": "table",
+          "rawQueryText": "SELECT source_file AS \"Source File\", host AS \"Host\", vuln_id AS \"CVE / ID\", name AS \"Vulnerability\", severity AS \"Severity\", cvss AS \"CVSS\", status AS \"Status\", detected_at AS \"Detected\" FROM vulnerabilities ORDER BY CASE severity WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 WHEN 'low' THEN 4 WHEN 'info' THEN 5 ELSE 6 END, detected_at DESC LIMIT 200",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
       "title": "All Vulnerabilities",
-      "type": "table",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 20 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT host AS 'Host', vuln_id AS 'CVE / ID', name AS 'Vulnerability', severity AS 'Severity', cvss AS 'CVSS', status AS 'Status', detected_at AS 'Detected' FROM vulnerabilities ORDER BY FIELD(severity,'critical','high','medium','low','info'), detected_at DESC LIMIT 200",
-        "format": "table",
-        "refId": "A"
-      }]
+      "type": "table"
     },
-
     {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
       "id": 11,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT host AS \"Host\", vuln_id AS \"CVE / ID\", event_type AS \"Suspicious Event\", severity AS \"Severity\", vuln_time AS \"Vuln Time\", event_time AS \"Event Time\", created_at AS \"Correlated At\" FROM correlations ORDER BY created_at DESC LIMIT 100",
+          "queryType": "table",
+          "rawQueryText": "SELECT host AS \"Host\", vuln_id AS \"CVE / ID\", event_type AS \"Suspicious Event\", severity AS \"Severity\", vuln_time AS \"Vuln Time\", event_time AS \"Event Time\", created_at AS \"Correlated At\" FROM correlations ORDER BY created_at DESC LIMIT 100",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
       "title": "Correlations — Possible Active Exploitation",
-      "type": "table",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 30 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT host AS 'Host', vuln_id AS 'CVE / ID', event_type AS 'Suspicious Event', severity AS 'Severity', vuln_time AS 'Vuln Time', event_time AS 'Event Time', created_at AS 'Correlated At' FROM correlations ORDER BY created_at DESC LIMIT 100",
-        "format": "table",
-        "refId": "A"
-      }]
+      "type": "table"
     },
-
     {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
       "id": 12,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT host AS \"Host\", event_id AS \"Event ID\", event_type AS \"Event Type\", severity AS \"Severity\", user AS \"User\", detected_at AS \"Detected\", description AS \"Description\" FROM events WHERE detected_at >= '${__from:date:iso}' AND detected_at <= '${__to:date:iso}' ORDER BY CASE severity WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 WHEN 'low' THEN 4 WHEN 'info' THEN 5 ELSE 6 END, detected_at DESC LIMIT 200",
+          "queryType": "table",
+          "rawQueryText": "SELECT host AS \"Host\", event_id AS \"Event ID\", event_type AS \"Event Type\", severity AS \"Severity\", user AS \"User\", detected_at AS \"Detected\", description AS \"Description\" FROM events WHERE detected_at >= '${__from:date:iso}' AND detected_at <= '${__to:date:iso}' ORDER BY CASE severity WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 WHEN 'low' THEN 4 WHEN 'info' THEN 5 ELSE 6 END, detected_at DESC LIMIT 200",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
       "title": "Recent Log360 Events",
-      "type": "table",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 38 },
-      "datasource": { "type": "mysql", "uid": "${datasource}" },
-      "targets": [{
-        "datasource": { "type": "mysql", "uid": "${datasource}" },
-        "rawSql": "SELECT host AS 'Host', event_id AS 'Event ID', event_type AS 'Event Type', severity AS 'Severity', user AS 'User', detected_at AS 'Detected', description AS 'Description' FROM events WHERE $__timeFilter(detected_at) ORDER BY FIELD(severity,'critical','high','medium','low','info'), detected_at DESC LIMIT 200",
-        "format": "table",
-        "refId": "A"
-      }]
+      "type": "table"
     }
-
-  ]
+  ],
+  "preload": false,
+  "refresh": "1m",
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "frser-sqlite-datasource",
+          "value": "aflb4dh3faqkgf"
+        },
+        "label": "SQLite Source",
+        "name": "datasource",
+        "options": [],
+        "query": "frser-sqlite-datasource",
+        "refresh": 1,
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "NYK-FIL Security Monitoring",
+  "uid": "capstone-security",
+  "version": 26,
+  "weekStart": ""
 }

