@@ -1,61 +1,58 @@
--- SQLite schema. Auto-created by setup.bat, or run manually:
---   sqlite3 capstone.db < storage/schema.sql
+-- Postgres schema for the hosted/cloud variant.
+-- Mirrors schema.sql but uses Postgres types and constraints.
 
--- ── F5 vulnerabilities (matches real scanner XML <scanner_vulnerabilities>) ──
 CREATE TABLE IF NOT EXISTS vulnerabilities (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  id          BIGSERIAL PRIMARY KEY,
   host        TEXT NOT NULL,
   url         TEXT,
   name        TEXT NOT NULL,
   attack_type TEXT,
   cookie      TEXT,
   severity    TEXT NOT NULL DEFAULT 'low'
-              CHECK(severity IN ('critical','high','medium','low','info')),
+              CHECK (severity IN ('critical','high','medium','low','info')),
   cvss        REAL,
   status      TEXT NOT NULL DEFAULT 'open'
-              CHECK(status IN ('open','resolved')),
-  detected_at TEXT NOT NULL,
+              CHECK (status IN ('open','resolved')),
+  detected_at TIMESTAMPTZ NOT NULL,
   raw_hash    TEXT NOT NULL UNIQUE,
-  aged        INTEGER NOT NULL DEFAULT 0,
+  aged        BOOLEAN NOT NULL DEFAULT FALSE,
   source_file TEXT,
-  created_at  TEXT DEFAULT CURRENT_TIMESTAMP
+  created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_vuln_host_severity ON vulnerabilities(host, severity);
 CREATE INDEX IF NOT EXISTS idx_vuln_detected_at   ON vulnerabilities(detected_at);
 CREATE INDEX IF NOT EXISTS idx_vuln_host_url      ON vulnerabilities(host, url);
 
--- ── Log360 events (unchanged — alignment pending xlsx review) ────────────────
 CREATE TABLE IF NOT EXISTS events (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  id          BIGSERIAL PRIMARY KEY,
   host        TEXT NOT NULL,
   event_id    TEXT,
   event_type  TEXT,
   severity    TEXT NOT NULL DEFAULT 'low'
-              CHECK(severity IN ('critical','high','medium','low','info')),
-  user        TEXT,
+              CHECK (severity IN ('critical','high','medium','low','info')),
+  "user"      TEXT,
   description TEXT,
-  detected_at TEXT NOT NULL,
+  detected_at TIMESTAMPTZ NOT NULL,
   raw_hash    TEXT NOT NULL UNIQUE,
   source_file TEXT,
-  created_at  TEXT DEFAULT CURRENT_TIMESTAMP
+  created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_event_host        ON events(host);
 CREATE INDEX IF NOT EXISTS idx_event_event_type  ON events(event_type);
 CREATE INDEX IF NOT EXISTS idx_event_detected_at ON events(detected_at);
 
--- ── Correlations (F5 vuln + Log360 event on same host) ───────────────────────
 CREATE TABLE IF NOT EXISTS correlations (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  id          BIGSERIAL PRIMARY KEY,
   host        TEXT NOT NULL,
   vuln_id     TEXT,
   event_id    TEXT,
   event_type  TEXT,
-  vuln_time   TEXT,
-  event_time  TEXT,
+  vuln_time   TIMESTAMPTZ,
+  event_time  TIMESTAMPTZ,
   severity    TEXT NOT NULL DEFAULT 'high'
-              CHECK(severity IN ('critical','high','medium','low','info')),
-  created_at  TEXT DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(host, vuln_id, event_id)
+              CHECK (severity IN ('critical','high','medium','low','info')),
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (host, vuln_id, event_id)
 );
 CREATE INDEX IF NOT EXISTS idx_corr_host     ON correlations(host);
 CREATE INDEX IF NOT EXISTS idx_corr_severity ON correlations(severity);

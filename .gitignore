@@ -4,3 +4,9 @@ __pycache__/
 inbox/
 processed/
 failed/
+
+# Build outputs — never commit these
+dist/
+build/downloads/
+*.db
+*.db-journal

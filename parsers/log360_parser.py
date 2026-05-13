@@ -15,6 +15,11 @@ def _normalize_severity(raw: str) -> str:
         "info":        "info",
         "informational": "info",
         "warning":     "medium",
+        # Windows audit outcomes emitted by Log360 xlsx exports
+        "success":         "info",
+        "audit success":   "info",
+        "failure":         "high",
+        "audit failure":   "high",
     }
     return mapping.get(raw.strip().lower(), "low")
 
@@ -87,7 +92,73 @@ def _parse_json(filepath: str) -> list:
     return records
 
 
+EXPECTED_HEADERS = ("time", "log source", "event id", "display name", "source", "severity")
+
+
+def _parse_xlsx(filepath: str) -> list:
+    from openpyxl import load_workbook
+
+    wb = load_workbook(filepath, read_only=True, data_only=True)
+    ws = wb.active
+    records = []
+
+    rows = list(ws.iter_rows(values_only=True))
+
+    i = 0
+    while i < len(rows):
+        cell_a = rows[i][0] if rows[i] else None
+        if isinstance(cell_a, str) and cell_a.strip().lower() == "all events":
+            # Find the next non-blank row — that should be the header
+            j = i + 1
+            while j < len(rows) and (not rows[j] or rows[j][0] is None or str(rows[j][0]).strip() == ""):
+                j += 1
+            if j >= len(rows):
+                break
+
+            header = rows[j]
+            header_norm = tuple(
+                (str(header[k]).strip().lower() if k < len(header) and header[k] is not None else "")
+                for k in range(6)
+            )
+            if header_norm != EXPECTED_HEADERS:
+                # Not the right "All Events" block — keep scanning
+                i += 1
+                continue
+
+            # Read data rows until column A is empty
+            k = j + 1
+            while k < len(rows):
+                row = rows[k]
+                if not row or row[0] is None or str(row[0]).strip() == "":
+                    break
+                ts          = str(row[0]).strip() if row[0] is not None else ""
+                log_source  = str(row[1]).strip() if len(row) > 1 and row[1] is not None else ""
+                event_id    = str(row[2]).strip() if len(row) > 2 and row[2] is not None else ""
+                display     = str(row[3]).strip() if len(row) > 3 and row[3] is not None else ""
+                source      = str(row[4]).strip() if len(row) > 4 and row[4] is not None else ""
+                severity    = str(row[5]).strip() if len(row) > 5 and row[5] is not None else "info"
+
+                records.append(_record(
+                    event_id    = event_id,
+                    timestamp   = ts,
+                    host        = log_source or display or "unknown",
+                    event_type  = source,
+                    severity    = severity,
+                    user        = "",
+                    description = display,
+                ))
+                k += 1
+            break
+        i += 1
+
+    wb.close()
+    return records
+
+
 def parse_log360(filepath: str) -> list:
-    if Path(filepath).suffix.lower() == ".json":
+    ext = Path(filepath).suffix.lower()
+    if ext == ".json":
         return _parse_json(filepath)
+    if ext in (".xlsx", ".xlsm"):
+        return _parse_xlsx(filepath)
     return _parse_xml(filepath)

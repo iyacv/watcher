@@ -395,6 +395,101 @@
       },
       "fieldConfig": {
         "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "File"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 360
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Records"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 13,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "${datasource}"
+          },
+          "queryText": "SELECT source_file AS \"File\", source AS \"Type\", COUNT(*) AS \"Records\", MIN(created_at) AS \"First Ingested\", MAX(created_at) AS \"Last Ingested\" FROM (SELECT source_file, 'F5 Vuln' AS source, created_at FROM vulnerabilities WHERE source_file IS NOT NULL UNION ALL SELECT source_file, 'Log360 Event' AS source, created_at FROM events WHERE source_file IS NOT NULL) GROUP BY source_file, source ORDER BY MAX(created_at) DESC LIMIT 100",
+          "queryType": "table",
+          "rawQueryText": "SELECT source_file AS \"File\", source AS \"Type\", COUNT(*) AS \"Records\", MIN(created_at) AS \"First Ingested\", MAX(created_at) AS \"Last Ingested\" FROM (SELECT source_file, 'F5 Vuln' AS source, created_at FROM vulnerabilities WHERE source_file IS NOT NULL UNION ALL SELECT source_file, 'Log360 Event' AS source, created_at FROM events WHERE source_file IS NOT NULL) GROUP BY source_file, source ORDER BY MAX(created_at) DESC LIMIT 100",
+          "refId": "A",
+          "timeColumns": []
+        }
+      ],
+      "title": "Ingestion Status — Files Imported to Dashboard",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
           "color": {
             "mode": "palette-classic"
           },
@@ -440,7 +535,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 4
+        "y": 10
       },
       "id": 6,
       "options": {
@@ -534,7 +629,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 4
+        "y": 10
       },
       "id": 7,
       "options": {
@@ -677,7 +772,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 12
+        "y": 18
       },
       "id": 8,
       "options": {
@@ -791,7 +886,7 @@
         "h": 8,
         "w": 16,
         "x": 8,
-        "y": 12
+        "y": 18
       },
       "id": 9,
       "options": {
@@ -901,7 +996,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 26
       },
       "id": 10,
       "options": {
@@ -963,7 +1058,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 36
       },
       "id": 11,
       "options": {
@@ -1025,7 +1120,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 44
       },
       "id": 12,
       "options": {
@@ -1078,6 +1173,6 @@
   "timezone": "browser",
   "title": "NYK-FIL Security Monitoring",
   "uid": "capstone-security",
-  "version": 26,
+  "version": 27,
   "weekStart": ""
 }

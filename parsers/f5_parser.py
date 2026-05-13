@@ -2,24 +2,32 @@ import hashlib
 import json
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
 
 
 def _normalize_severity(raw: str) -> str:
     mapping = {
-        "critical": "critical",
-        "high":     "high",
-        "medium":   "medium",
-        "moderate": "medium",
-        "low":      "low",
-        "info":     "info",
+        "critical":      "critical",
+        "high":          "high",
+        "medium":        "medium",
+        "moderate":      "medium",
+        "low":           "low",
+        "info":          "info",
         "informational": "info",
     }
-    return mapping.get(raw.strip().lower(), "low")
+    return mapping.get((raw or "").strip().lower(), "low")
 
 
-def _make_hash(host: str, vuln_id: str, severity: str) -> str:
-    key = f"{host}|{vuln_id}|{severity}"
+def _host_from_url(url: str) -> str:
+    if not url:
+        return "unknown"
+    parsed = urlparse(url.strip())
+    return parsed.hostname or url.strip()
+
+
+def _make_hash(host: str, url: str, name: str, attack_type: str, cookie: str) -> str:
+    key = f"{host}|{url}|{name}|{attack_type or ''}|{cookie or ''}"
     return hashlib.sha256(key.encode()).hexdigest()
 
 
@@ -31,51 +39,58 @@ def _text(el, *tags) -> str:
     return ""
 
 
-def _record(host, port, vuln_id, name, severity, cvss, description, remediation, scan_date):
-    sev = _normalize_severity(severity)
+def _record(name, url, attack_type, cookie, severity, score, status, opened, fallback_ts):
+    sev  = _normalize_severity(severity)
+    host = _host_from_url(url)
+    ts   = opened or fallback_ts
+    try:
+        cvss = float(score) if score not in (None, "") else None
+    except (TypeError, ValueError):
+        cvss = None
     return {
         "source":      "f5",
-        "host":        host.strip(),
-        "port":        int(port) if port else None,
-        "vuln_id":     vuln_id.strip(),
-        "name":        name.strip(),
+        "host":        host,
+        "url":         url.strip() if url else None,
+        "name":        (name or "").strip(),
+        "attack_type": (attack_type.strip() or None) if attack_type else None,
+        "cookie":      (cookie.strip() or None) if cookie else None,
         "severity":    sev,
-        "cvss":        float(cvss) if cvss else None,
-        "description": description.strip() if description else "",
-        "remediation": remediation.strip() if remediation else "",
-        "detected_at": scan_date or datetime.utcnow().isoformat(),
-        "raw_hash":    _make_hash(host, vuln_id, sev),
-        "status":      "open",
+        "cvss":        cvss,
+        "status":      (status or "open").strip().lower(),
+        "detected_at": ts,
+        "raw_hash":    _make_hash(host, url or "", name or "", attack_type or "", cookie or ""),
         "aged":        False,
     }
+
+
+def _file_mtime(filepath: str) -> str:
+    try:
+        return datetime.fromtimestamp(Path(filepath).stat().st_mtime).isoformat(timespec="seconds")
+    except OSError:
+        return datetime.utcnow().isoformat(timespec="seconds")
 
 
 def _parse_xml(filepath: str) -> list:
     tree = ET.parse(filepath)
     root = tree.getroot()
+    fallback_ts = _file_mtime(filepath)
     records = []
 
-    scans = root.findall(".//Scan")
-    if not scans:
-        scans = [root]
-
-    for scan in scans:
-        scan_date = _text(scan, "ScanDate", "scan_date") or datetime.utcnow().date().isoformat()
-        host = _text(scan, "Target/Host", "target/host") or "unknown"
-        port = _text(scan, "Target/Port", "target/port")
-
-        for vuln in scan.findall(".//Vulnerability") + scan.findall(".//vulnerability"):
-            records.append(_record(
-                host        = host,
-                port        = port,
-                vuln_id     = _text(vuln, "ID", "id"),
-                name        = _text(vuln, "Name", "name"),
-                severity    = _text(vuln, "Severity", "severity") or "low",
-                cvss        = _text(vuln, "CVSS", "cvss"),
-                description = _text(vuln, "Description", "description"),
-                remediation = _text(vuln, "Remediation", "remediation"),
-                scan_date   = scan_date,
-            ))
+    # Real F5 scanner XML uses <scanner_vulnerabilities>/<vulnerability>.
+    # Also tolerate the older capitalized form.
+    vulns = root.findall(".//vulnerability") + root.findall(".//Vulnerability")
+    for v in vulns:
+        records.append(_record(
+            name        = _text(v, "name", "Name"),
+            url         = _text(v, "url", "URL", "Url"),
+            attack_type = _text(v, "attack_type", "AttackType"),
+            cookie      = _text(v, "cookie", "Cookie"),
+            severity    = _text(v, "threat", "Threat", "severity", "Severity") or "low",
+            score       = _text(v, "score", "Score", "cvss", "CVSS"),
+            status      = _text(v, "status", "Status") or "open",
+            opened      = _text(v, "opened", "Opened"),
+            fallback_ts = fallback_ts,
+        ))
     return records
 
 
@@ -83,27 +98,25 @@ def _parse_json(filepath: str) -> list:
     with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    scans = data if isinstance(data, list) else [data]
+    if isinstance(data, list):
+        items = data
+    else:
+        items = data.get("vulnerabilities") or data.get("scanner_vulnerabilities") or []
+
+    fallback_ts = _file_mtime(filepath)
     records = []
-
-    for scan in scans:
-        scan_date = scan.get("scan_date", datetime.utcnow().date().isoformat())
-        target    = scan.get("target", {})
-        host      = target.get("host", "unknown")
-        port      = target.get("port")
-
-        for vuln in scan.get("vulnerabilities", []):
-            records.append(_record(
-                host        = host,
-                port        = port,
-                vuln_id     = vuln.get("id", ""),
-                name        = vuln.get("name", ""),
-                severity    = vuln.get("severity", "low"),
-                cvss        = vuln.get("cvss", 0),
-                description = vuln.get("description", ""),
-                remediation = vuln.get("remediation", ""),
-                scan_date   = scan_date,
-            ))
+    for v in items:
+        records.append(_record(
+            name        = v.get("name", ""),
+            url         = v.get("url", ""),
+            attack_type = v.get("attack_type") or "",
+            cookie      = v.get("cookie") or "",
+            severity    = v.get("threat") or v.get("severity") or "low",
+            score       = v.get("score") if v.get("score") is not None else v.get("cvss"),
+            status      = v.get("status") or "open",
+            opened      = v.get("opened") or "",
+            fallback_ts = fallback_ts,
+        ))
     return records
 
 

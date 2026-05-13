@@ -15,16 +15,16 @@ from datetime import datetime, timedelta, timezone
 import config
 
 # Log360 event types that suggest active exploitation
-#_SUSPICIOUS_EVENTS = {
-      #  "authentication failure",
-       # "brute force",
-        #"privilege escalation",
-        #"unauthorized access",
-        #"suspicious login",
-        #"malware detected",
-        #"lateral movement",
-        #"data exfiltration",
-#}
+_SUSPICIOUS_EVENTS = {
+    "authentication failure",
+    "brute force",
+    "privilege escalation",
+    "unauthorized access",
+    "suspicious login",
+    "malware detected",
+    "lateral movement",
+    "data exfiltration",
+}
 
 
 def _parse_dt(ts: str) -> datetime:

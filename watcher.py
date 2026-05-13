@@ -7,6 +7,7 @@ import time
 import shutil
 import logging
 import os
+import threading
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -28,26 +29,42 @@ log = logging.getLogger(__name__)
 
 
 def detect_source(filepath: str) -> str:
-    """Guess file source from filename prefix or content tag."""
-    name = Path(filepath).stem.lower()
+    """Guess file source from filename prefix, extension, or content tag."""
+    path = Path(filepath)
+    name = path.stem.lower()
+    ext  = path.suffix.lower()
     if name.startswith("f5"):
         return "f5"
     if name.startswith("log360") or name.startswith("l360"):
         return "log360"
-    # Fallback: peek at the file
+    # Excel exports only come from Log360 — F5 is XML-only
+    if ext in (".xlsx", ".xlsm"):
+        return "log360"
+    # Fallback: peek at the file (text formats only)
     with open(filepath, "r", errors="ignore") as f:
         head = f.read(512)
-    if "<ScanResults" in head or "<F5" in head or "CVE" in head:
+    if "<scanner_vulnerabilities" in head or "<ScanResults" in head or "<F5" in head or "CVE" in head:
         return "f5"
     return "log360"
 
 
+_in_flight = set()
+_in_flight_lock = threading.Lock()
+
+
 def process_file(filepath: str):
     path = Path(filepath)
-    # Guard against double-fire from watchdog: another thread may have already
-    # processed and removed the file before we got here.
-    if not os.path.exists(filepath):
-        return
+    key = os.path.normcase(os.path.abspath(filepath))
+
+    # Watchdog often fires both on_created and on_moved for a single drop on
+    # Windows. Claim the path atomically so only one thread processes it.
+    with _in_flight_lock:
+        if key in _in_flight:
+            return
+        if not os.path.exists(filepath):
+            return
+        _in_flight.add(key)
+
     log.info("Detected new file: %s", path.name)
 
     try:
@@ -107,6 +124,10 @@ def process_file(filepath: str):
         except FileNotFoundError:
             pass
 
+    except FileNotFoundError:
+        # Another watcher instance (or our own move) already claimed the file.
+        # This is benign — just say so and move on without a stack trace.
+        log.info("Skipped %s: already handled by another worker.", path.name)
     except Exception as exc:
         log.error("Failed to process %s: %s", path.name, exc, exc_info=True)
         try:
@@ -114,6 +135,9 @@ def process_file(filepath: str):
             shutil.move(filepath, dest)
         except FileNotFoundError:
             pass
+    finally:
+        with _in_flight_lock:
+            _in_flight.discard(key)
 
 
 class InboxHandler(FileSystemEventHandler):

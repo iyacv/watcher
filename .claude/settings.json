@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tasklist)",
+      "Bash(netstat -ano)",
+      "PowerShell(Get-Process -Id 5444)",
+      "PowerShell(Get-Process -Id 5836)",
+      "PowerShell(Get-CimInstance Win32_Process -Filter \"ProcessId=5444 OR ProcessId=5836\")",
+      "Read(//c/Program Files \\(x86\\)/**)",
+      "Bash(\"D:/Riann/Grafana/grafana/bin/grafana-cli.exe\" --homepath \"D:/Riann/Grafana/grafana\" admin reset-admin-password admin)"
+    ]
+  }
+}
