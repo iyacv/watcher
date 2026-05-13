@@ -24,8 +24,11 @@ def load_existing_hashes(conn):
     for table in ("vulnerabilities", "events"):
         try:
             cursor.execute(f"SELECT raw_hash FROM {table}")
-            for (h,) in cursor.fetchall():
-                _seen_hashes.add(h)
+            for row in cursor.fetchall():
+                # Postgres RealDictCursor returns dicts; SQLite returns tuples/Rows.
+                h = row["raw_hash"] if isinstance(row, dict) else row[0]
+                if h:
+                    _seen_hashes.add(h)
         except Exception:
             pass
     cursor.close()

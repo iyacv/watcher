@@ -14,6 +14,10 @@ BASE = Path(__file__).resolve().parent.parent
 if str(BASE) not in sys.path:
     sys.path.insert(0, str(BASE))
 
+# Load .env so DATABASE_URL is picked up when running this script directly.
+from dotenv import load_dotenv
+load_dotenv(BASE / ".env")
+
 _TABLES = ("correlations", "vulnerabilities", "events")
 
 
@@ -34,9 +38,12 @@ def _init_sqlite(reset: bool = False):
 
 
 def _init_postgres(reset: bool = False):
-    import psycopg2
+    import psycopg
     schema = (BASE / "storage" / "schema.postgres.sql").read_text(encoding="utf-8")
-    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    url = os.environ["DATABASE_URL"]
+    if "sslmode=" not in url:
+        url += ("&" if "?" in url else "?") + "sslmode=require"
+    conn = psycopg.connect(url)
     cur = conn.cursor()
     if reset:
         for tbl in _TABLES:

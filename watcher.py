@@ -7,8 +7,17 @@ import time
 import shutil
 import logging
 import os
+import sys
 import threading
 from pathlib import Path
+
+# Ensure this script's directory is importable even when launched from
+# Task Scheduler or under embeddable Python (which omits the script dir
+# from sys.path via python._pth).
+_HERE = Path(__file__).resolve().parent
+if str(_HERE) not in sys.path:
+    sys.path.insert(0, str(_HERE))
+
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -85,8 +94,13 @@ def process_file(filepath: str):
             record["source_file"] = path.name
 
             # ── Deduplication ─────────────────────────────────────────────
-            if is_duplicate(record):
-                log.debug("Duplicate skipped: %s on %s", record.get("vuln_id"), record.get("host"))
+            # For Log360 events (point-in-time happenings), a duplicate hash
+            # means the same event was already recorded — skip entirely.
+            # For F5 vulnerabilities (persistent state), we let duplicates
+            # through so the storage layer can update severity/status and
+            # log to vulnerability_changes if anything actually changed.
+            if source == "log360" and is_duplicate(record):
+                log.debug("Duplicate skipped: %s on %s", record.get("event_id"), record.get("host"))
                 continue
 
             # ── Prioritization ────────────────────────────────────────────

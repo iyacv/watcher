@@ -5,23 +5,25 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 
 
+_LOG360_SEVERITIES = {"error", "failure", "warning", "information", "success"}
+
+
 def _normalize_severity(raw: str) -> str:
-    mapping = {
-        "critical":    "critical",
-        "high":        "high",
-        "medium":      "medium",
-        "moderate":    "medium",
-        "low":         "low",
-        "info":        "info",
-        "informational": "info",
-        "warning":     "medium",
-        # Windows audit outcomes emitted by Log360 xlsx exports
-        "success":         "info",
-        "audit success":   "info",
-        "failure":         "high",
-        "audit failure":   "high",
+    """Keep Log360's native vocabulary. F5 uses CVSS-derived severity;
+    Log360 uses Windows event outcomes — they measure different things, so
+    we don't try to flatten one into the other."""
+    s = (raw or "").strip().lower()
+    # Common synonyms that show up in Log360 exports
+    aliases = {
+        "audit success":   "success",
+        "audit failure":   "failure",
+        "info":            "information",
+        "informational":   "information",
+        "err":             "error",
+        "warn":            "warning",
     }
-    return mapping.get(raw.strip().lower(), "low")
+    s = aliases.get(s, s)
+    return s if s in _LOG360_SEVERITIES else "information"
 
 
 def _make_hash(host: str, event_id: str, timestamp: str) -> str:

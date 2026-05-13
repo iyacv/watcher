@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scanner_vulnerabilities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" version="1.0">
+  <!--
+    Simulated F5 RESCAN. These five vulnerabilities already exist in the DB
+    from the previous scan; this file rates them with NEW severity values.
+    The watcher should:
+      - NOT insert duplicate rows (raw_hash matches existing rows)
+      - UPDATE severity/cvss/last_seen on each existing row
+      - Write a row to vulnerability_changes for every severity flip
+  -->
+
+  <vulnerability>
+    <name>Insecure Transport Layer</name>
+    <url>https://back-end.spoon.ph/</url>
+    <threat>critical</threat>
+    <score>9.5</score>
+    <status>open</status>
+    <opened xsi:nil="true" />
+  </vulnerability>
+
+  <vulnerability>
+    <name>Missing Security Headers</name>
+    <url>https://back-end.spoon.ph/</url>
+    <threat>high</threat>
+    <score>7.5</score>
+    <status>open</status>
+    <opened xsi:nil="true" />
+  </vulnerability>
+
+  <vulnerability>
+    <name>Vulnerable JavaScript Library</name>
+    <url>https://cdn.jsdelivr.net/npm/jquery@3.5.0/dist/jquery.slim.min.js</url>
+    <threat>critical</threat>
+    <score>9.8</score>
+    <status>open</status>
+    <opened xsi:nil="true" />
+  </vulnerability>
+
+  <vulnerability>
+    <name>Insecure Transport Layer</name>
+    <url>https://mpipv2.nykfil.com.ph/</url>
+    <threat>high</threat>
+    <score>7.0</score>
+    <status>open</status>
+    <opened xsi:nil="true" />
+  </vulnerability>
+
+  <vulnerability>
+    <name>Missing Security Headers</name>
+    <url>https://mpipv2.nykfil.com.ph/IMAGE</url>
+    <threat>low</threat>
+    <score>3.0</score>
+    <status>resolved</status>
+    <opened xsi:nil="true" />
+  </vulnerability>
+
+</scanner_vulnerabilities>

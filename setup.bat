@@ -1,17 +1,16 @@
 @echo off
-title NYK-FIL Maritime - Security Monitoring System Setup
+title NYK-FIL Maritime - Security Monitoring Watcher Setup
 setlocal EnableDelayedExpansion
 
 echo ============================================
 echo  NYK-FIL Maritime E Training Inc.
-echo  Security Monitoring System - Setup
+echo  Security Monitoring Watcher - Setup
 echo ============================================
 echo.
 
 set "ROOT=%~dp0"
 set "BUNDLED_PY=%ROOT%python\python.exe"
 set "BUNDLED_PYW=%ROOT%python\pythonw.exe"
-set "BUNDLED_GFS=%ROOT%grafana\bin\grafana-server.exe"
 
 :: ── Mode detection: bundled (portable) vs system (dev) ──────────────────────
 if exist "%BUNDLED_PY%" (
@@ -28,7 +27,7 @@ echo.
 
 :: ── 1. Python check (system mode only) ──────────────────────────────────────
 if /I "%MODE%"=="system" (
-    echo [1/6] Checking Python installation...
+    echo [1/5] Checking Python installation...
     "%PYTHON%" --version >nul 2>&1
     if errorlevel 1 (
         echo ERROR: Python not found. Install Python 3.10+ from https://www.python.org
@@ -36,57 +35,64 @@ if /I "%MODE%"=="system" (
     )
     echo       Python found.
 
-    echo [2/6] Installing Python packages...
+    echo [2/5] Installing Python packages...
     "%PYTHON%" -m pip install -r "%ROOT%requirements.txt" --quiet
     if errorlevel 1 ( echo ERROR: pip install failed. & pause & exit /b 1 )
     echo       Packages installed.
 ) else (
-    echo [1/6] Bundled Python detected — skipping system Python check.
-    echo [2/6] Bundled dependencies — skipping pip install.
+    echo [1/5] Bundled Python detected — skipping system Python check.
+    echo [2/5] Bundled dependencies — skipping pip install.
 )
 echo.
 
 :: ── 3. Folders ──────────────────────────────────────────────────────────────
-echo [3/6] Creating inbox / processed / failed folders...
+echo [3/5] Creating inbox / processed / failed folders...
 if not exist "%ROOT%inbox"     mkdir "%ROOT%inbox"
 if not exist "%ROOT%processed" mkdir "%ROOT%processed"
 if not exist "%ROOT%failed"    mkdir "%ROOT%failed"
 echo       Folders ready.
 echo.
 
-:: ── 4. SQLite database ──────────────────────────────────────────────────────
-echo [4/6] Initializing SQLite database...
-"%PYTHON%" "%ROOT%storage\init_db.py"
-if errorlevel 1 ( echo ERROR: DB init failed. & pause & exit /b 1 )
-echo.
-
-:: ── 5. Provision Grafana datasource + dashboard ─────────────────────────────
-echo [5/6] Provisioning Grafana data source and dashboard...
-"%PYTHON%" "%ROOT%grafana\provision.py"
-if errorlevel 1 (
-    echo       NOTE: provisioning failed. If using system Grafana, install it,
-    echo             ensure grafana-cli is on PATH, then run provision.py manually.
-)
-echo.
-
-:: ── 6. Register auto-start tasks (no admin required, runs on user logon) ───
-echo [6/6] Registering auto-start (Task Scheduler, on user logon)...
-
-if /I "%MODE%"=="bundled" (
-    schtasks /delete /tn "NYKFilGrafana" /f >nul 2>&1
-    schtasks /create /tn "NYKFilGrafana" ^
-        /tr "\"%BUNDLED_GFS%\" --homepath \"%ROOT%grafana\"" ^
-        /sc onlogon /f >nul
-    if errorlevel 1 (
-        echo       WARNING: could not register Grafana auto-start.
-    ) else (
-        echo       Grafana auto-start registered.
+:: ── 4. Database connection (.env) ───────────────────────────────────────────
+echo [4/5] Checking database configuration...
+if exist "%ROOT%.env" (
+    findstr /b /c:"DATABASE_URL=postgres" "%ROOT%.env" >nul 2>&1
+    if not errorlevel 1 (
+        echo       .env already configured — skipping prompt.
+        goto :env_done
     )
 )
 
+echo.
+echo       This watcher writes to a shared Supabase Postgres database.
+echo       Paste the DATABASE_URL provided by your administrator.
+echo.
+echo       It looks like:
+echo         postgresql://postgres.xxxx:PASSWORD@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres
+echo.
+set /p "DBURL=       DATABASE_URL: "
+
+if "!DBURL!"=="" (
+    echo ERROR: No DATABASE_URL entered. Aborting.
+    pause & exit /b 1
+)
+
+:: Write a fresh .env with the pasted URL
+> "%ROOT%.env" echo DATABASE_URL=!DBURL!
+>> "%ROOT%.env" echo KEEP_PROCESSED=false
+echo       Saved connection string to .env
+
+:env_done
+echo.
+
+:: ── 5. Register watcher auto-start (no admin required, runs on user logon) ─
+echo [5/5] Registering watcher auto-start (Task Scheduler, on user logon)...
 schtasks /delete /tn "NYKFilWatcher" /f >nul 2>&1
+:: Use cmd /c to set the working directory before launching pythonw, so the
+:: watcher's `import config` (sibling file) resolves correctly.
+set "ROOT_NOSLASH=%ROOT:~0,-1%"
 schtasks /create /tn "NYKFilWatcher" ^
-    /tr "\"%PYTHONW%\" \"%ROOT%watcher.py\"" ^
+    /tr "cmd /c cd /d \"%ROOT_NOSLASH%\" && \"%PYTHONW%\" \"%ROOT%watcher.py\"" ^
     /sc onlogon /f >nul
 if errorlevel 1 (
     echo       WARNING: could not register watcher auto-start.
@@ -95,35 +101,10 @@ if errorlevel 1 (
 )
 echo.
 
-:: ── 6b. Firewall rule so other PCs on the LAN can reach Grafana ────────────
-echo Opening Windows Firewall for port 3000 (LAN dashboard access)...
-netsh advfirewall firewall delete rule name="NYKFil Grafana Dashboard" >nul 2>&1
-netsh advfirewall firewall add rule name="NYKFil Grafana Dashboard" ^
-    dir=in action=allow protocol=TCP localport=3000 profile=private,domain >nul 2>&1
-if errorlevel 1 (
-    echo       NOTE: could not add firewall rule automatically.
-    echo             If staff cannot reach the dashboard from other PCs,
-    echo             re-run this setup.bat as Administrator.
-) else (
-    echo       Firewall rule added (private/domain networks).
-)
-echo.
-
 :: ── Start now ───────────────────────────────────────────────────────────────
-echo Starting services...
-if /I "%MODE%"=="bundled" (
-    schtasks /run /tn "NYKFilGrafana" >nul 2>&1
-    timeout /t 4 /nobreak >nul
-)
+echo Starting watcher...
 schtasks /run /tn "NYKFilWatcher" >nul 2>&1
 echo.
-
-:: ── Detect this PC's LAN IP so staff know what URL to use ─────────────────
-set "HOST_IP="
-for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /c:"IPv4 Address"') do (
-    if not defined HOST_IP set "HOST_IP=%%a"
-)
-set "HOST_IP=%HOST_IP: =%"
 
 echo ============================================
 echo  Setup complete.
@@ -131,23 +112,13 @@ echo.
 echo  Drop F5 / Log360 export files into:
 echo    %ROOT%inbox\
 echo.
-echo  Database file (all data is stored here):
-echo    %ROOT%capstone.db
+echo  All data is written to the shared Supabase database.
 echo.
-echo  Dashboard URLs:
-echo    On this PC          : http://localhost:3000
-if defined HOST_IP (
-echo    From other staff PCs: http://%HOST_IP%:3000
-) else (
-echo    From other staff PCs: http://^<this-pc-ip^>:3000  (run 'ipconfig' to find it)
-)
+echo  View the dashboard in your browser:
+echo    Grafana Cloud (URL provided by your administrator)
 echo.
-echo  First login: admin / admin   (you will be asked to set a new password)
-echo  Then create accounts for staff under:
-echo    Administration -^> Users and access -^> Users -^> New user
-echo    (default role = Viewer, which is read-only)
+echo  To uninstall: schtasks /delete /tn "NYKFilWatcher" /f
 echo ============================================
 echo.
 
-start "" "http://localhost:3000"
 pause

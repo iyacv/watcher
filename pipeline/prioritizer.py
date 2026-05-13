@@ -39,6 +39,13 @@ def _parse_dt(ts: str) -> datetime:
 
 
 def prioritize(record: dict) -> dict:
+    # All escalation rules use F5/CVSS semantics. Log360 events use their own
+    # native vocabulary (error/failure/warning/information/success) which we
+    # don't try to escalate — they describe Windows event outcomes, not
+    # vulnerability risk.
+    if record.get("source") != "f5":
+        return record
+
     sev = record.get("severity", "low")
 
     # Rule 1: CVSS score override
@@ -50,8 +57,8 @@ def prioritize(record: dict) -> dict:
     if record.get("host") in _HIGH_VALUE_HOSTS:
         sev = _escalate(sev)
 
-    # Rule 3: Aging — only applies to F5 vulns with a detected_at
-    if record.get("source") == "f5" and record.get("detected_at"):
+    # Rule 3: Aging
+    if record.get("detected_at"):
         age = datetime.now(tz=timezone.utc) - _parse_dt(record["detected_at"])
         if age.days >= config.AGING_THRESHOLD_DAYS:
             sev = _escalate(sev)

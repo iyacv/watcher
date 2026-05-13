@@ -11,14 +11,6 @@ def get_connection():
 
 
 def insert_vulnerability(conn, r: dict) -> int:
-    sql = """
-        INSERT INTO vulnerabilities
-          (host, url, name, attack_type, cookie, severity, cvss,
-           status, detected_at, raw_hash, aged, source_file)
-        VALUES
-          (:host, :url, :name, :attack_type, :cookie, :severity, :cvss,
-           :status, :detected_at, :raw_hash, :aged, :source_file)
-    """
     r.setdefault("aged", False)
     r.setdefault("status", "open")
     r.setdefault("source_file", None)
@@ -26,10 +18,49 @@ def insert_vulnerability(conn, r: dict) -> int:
     r.setdefault("attack_type", None)
     r.setdefault("cookie", None)
     r.setdefault("cvss", None)
+
     cursor = conn.cursor()
-    cursor.execute(sql, r)
+    cursor.execute(
+        "SELECT id, severity FROM vulnerabilities WHERE raw_hash = :raw_hash",
+        {"raw_hash": r["raw_hash"]},
+    )
+    existing = cursor.fetchone()
+
+    if existing is None:
+        cursor.execute("""
+            INSERT INTO vulnerabilities
+              (host, url, name, attack_type, cookie, severity, cvss,
+               status, detected_at, last_seen, raw_hash, aged, source_file)
+            VALUES
+              (:host, :url, :name, :attack_type, :cookie, :severity, :cvss,
+               :status, :detected_at, CURRENT_TIMESTAMP, :raw_hash, :aged, :source_file)
+        """, r)
+        conn.commit()
+        last_id = cursor.lastrowid
+        cursor.close()
+        return last_id
+
+    old_sev = existing["severity"]
+    new_sev = r["severity"]
+    if old_sev != new_sev:
+        cursor.execute("""
+            INSERT INTO vulnerability_changes
+              (vuln_hash, host, name, old_severity, new_severity)
+            VALUES
+              (:raw_hash, :host, :name, :old, :new)
+        """, {**r, "old": old_sev, "new": new_sev})
+
+    cursor.execute("""
+        UPDATE vulnerabilities SET
+          severity    = :severity,
+          cvss        = :cvss,
+          status      = :status,
+          last_seen   = CURRENT_TIMESTAMP,
+          source_file = :source_file
+        WHERE raw_hash = :raw_hash
+    """, r)
     conn.commit()
-    last_id = cursor.lastrowid
+    last_id = existing["id"]
     cursor.close()
     return last_id
 

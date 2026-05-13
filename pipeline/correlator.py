@@ -10,9 +10,13 @@ Logic:
 Called after every record is inserted. Checks the opposite source in the DB.
 """
 
+import os
 from datetime import datetime, timedelta, timezone
 
 import config
+
+# Placeholder style: psycopg3 (Postgres) wants %s; sqlite3 wants ?
+_PH = "%s" if os.getenv("DATABASE_URL") else "?"
 
 # Log360 event types that suggest active exploitation
 _SUSPICIOUS_EVENTS = {
@@ -36,6 +40,16 @@ def _parse_dt(ts: str) -> datetime:
     return datetime.now(tz=timezone.utc)
 
 
+def _row_get(row, key):
+    """Works for both sqlite3.Row (key access) and psycopg dict_row (dict)."""
+    if isinstance(row, dict):
+        return row.get(key)
+    try:
+        return row[key]
+    except (KeyError, IndexError):
+        return None
+
+
 def correlate(conn, record: dict) -> dict | None:
     """
     Returns a correlation dict if a match is found, otherwise None.
@@ -44,34 +58,35 @@ def correlate(conn, record: dict) -> dict | None:
     source = record.get("source")
     ts     = _parse_dt(record.get("detected_at", ""))
     window = timedelta(minutes=config.CORRELATION_WINDOW_MINUTES)
+    t_lo   = (ts - window).strftime("%Y-%m-%d %H:%M:%S")
+    t_hi   = (ts + window).strftime("%Y-%m-%d %H:%M:%S")
 
     cursor = conn.cursor()
 
     if source == "f5":
         # New F5 vuln → look for matching suspicious Log360 event on same host
-        cursor.execute(
-            """
+        placeholders = ",".join([_PH] * len(_SUSPICIOUS_EVENTS))
+        sql = f"""
             SELECT event_id, event_type, detected_at
             FROM events
-            WHERE host = ?
+            WHERE host = {_PH}
               AND LOWER(event_type) IN ({placeholders})
-              AND detected_at BETWEEN ? AND ?
+              AND detected_at BETWEEN {_PH} AND {_PH}
             LIMIT 1
-            """.format(placeholders=",".join(["?"] * len(_SUSPICIOUS_EVENTS))),
-            (host, *_SUSPICIOUS_EVENTS,
-             (ts - window).strftime("%Y-%m-%d %H:%M:%S"),
-             (ts + window).strftime("%Y-%m-%d %H:%M:%S")),
-        )
+        """
+        cursor.execute(sql, (host, *_SUSPICIOUS_EVENTS, t_lo, t_hi))
         row = cursor.fetchone()
         if row:
             cursor.close()
             return {
                 "host":       host,
-                "vuln_id":    record.get("vuln_id"),
-                "event_id":   row["event_id"],
-                "event_type": row["event_type"],
+                # `vulnerabilities` has no vuln_id column — the identifier
+                # we store in `correlations.vuln_id` is the vuln name (CVE/ID).
+                "vuln_id":    record.get("name"),
+                "event_id":   _row_get(row, "event_id"),
+                "event_type": _row_get(row, "event_type"),
                 "vuln_time":  record.get("detected_at"),
-                "event_time": str(row["detected_at"]),
+                "event_time": str(_row_get(row, "detected_at")),
                 "severity":   record.get("severity"),
             }
 
@@ -82,30 +97,26 @@ def correlate(conn, record: dict) -> dict | None:
             cursor.close()
             return None
 
-        cursor.execute(
-            """
-            SELECT vuln_id, severity, detected_at
+        sql = f"""
+            SELECT name, severity, detected_at
             FROM vulnerabilities
-            WHERE host = ?
-              AND detected_at BETWEEN ? AND ?
+            WHERE host = {_PH}
+              AND detected_at BETWEEN {_PH} AND {_PH}
             ORDER BY severity DESC
             LIMIT 1
-            """,
-            (host,
-             (ts - window).strftime("%Y-%m-%d %H:%M:%S"),
-             (ts + window).strftime("%Y-%m-%d %H:%M:%S")),
-        )
+        """
+        cursor.execute(sql, (host, t_lo, t_hi))
         row = cursor.fetchone()
         if row:
             cursor.close()
             return {
                 "host":       host,
-                "vuln_id":    row["vuln_id"],
+                "vuln_id":    _row_get(row, "name"),
                 "event_id":   record.get("event_id"),
                 "event_type": record.get("event_type"),
-                "vuln_time":  str(row["detected_at"]),
+                "vuln_time":  str(_row_get(row, "detected_at")),
                 "event_time": record.get("detected_at"),
-                "severity":   row["severity"],
+                "severity":   _row_get(row, "severity"),
             }
 
     cursor.close()

@@ -7,7 +7,17 @@
       "PowerShell(Get-Process -Id 5836)",
       "PowerShell(Get-CimInstance Win32_Process -Filter \"ProcessId=5444 OR ProcessId=5836\")",
       "Read(//c/Program Files \\(x86\\)/**)",
-      "Bash(\"D:/Riann/Grafana/grafana/bin/grafana-cli.exe\" --homepath \"D:/Riann/Grafana/grafana\" admin reset-admin-password admin)"
+      "Bash(\"D:/Riann/Grafana/grafana/bin/grafana-cli.exe\" --homepath \"D:/Riann/Grafana/grafana\" admin reset-admin-password admin)",
+      "Bash(if [ -f \"dist/NYKFilWatcher/.env\" ]; then rm \"dist/NYKFilWatcher/.env\" && echo \"Deleted dist .env \\(will be created by setup.bat on install\\)\"; fi)",
+      "Bash(cat /c/Users/Riri/AppData/Local/Temp/claude/d--Riann-capstone-watcher/6b1e4326-9c77-48c2-bc49-0ae2d26a39ef/tasks/bbo4wsjj7.output 2>/dev/null)",
+      "Read(//c/Users/Riri/AppData/Local/Temp/claude/d--Riann-capstone-watcher/6b1e4326-9c77-48c2-bc49-0ae2d26a39ef/tasks/**)",
+      "Bash(python storage/init_db.py)",
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import json; d=json.load\\(open\\('grafana/dashboard.json'\\)\\); print\\('panels:', len\\(d.get\\('panels',[]\\)\\)\\); print\\('templating vars:', len\\(d.get\\('templating',{}\\).get\\('list',[]\\)\\)\\); import sys; sys.stdout.write\\(json.dumps\\(d.get\\('templating',{}\\), indent=2\\)[:1500]\\)\")",
+      "Bash(python)"
+    ],
+    "additionalDirectories": [
+      "D:\\Riann\\capstone\\watcher\\dist\\NYKFilWatcher"
     ]
   }
 }

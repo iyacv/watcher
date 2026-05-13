@@ -15,23 +15,35 @@ CREATE TABLE IF NOT EXISTS vulnerabilities (
   status      TEXT NOT NULL DEFAULT 'open'
               CHECK(status IN ('open','resolved')),
   detected_at TEXT NOT NULL,
+  last_seen   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   raw_hash    TEXT NOT NULL UNIQUE,
   aged        INTEGER NOT NULL DEFAULT 0,
   source_file TEXT,
   created_at  TEXT DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS vulnerability_changes (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  vuln_hash    TEXT NOT NULL,
+  host         TEXT NOT NULL,
+  name         TEXT NOT NULL,
+  old_severity TEXT NOT NULL,
+  new_severity TEXT NOT NULL,
+  changed_at   TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_vuln_changes_hash       ON vulnerability_changes(vuln_hash);
+CREATE INDEX IF NOT EXISTS idx_vuln_changes_changed_at ON vulnerability_changes(changed_at);
 CREATE INDEX IF NOT EXISTS idx_vuln_host_severity ON vulnerabilities(host, severity);
 CREATE INDEX IF NOT EXISTS idx_vuln_detected_at   ON vulnerabilities(detected_at);
 CREATE INDEX IF NOT EXISTS idx_vuln_host_url      ON vulnerabilities(host, url);
 
--- ── Log360 events (unchanged — alignment pending xlsx review) ────────────────
+-- ── Log360 events — keeps Log360's native Windows event vocabulary ──────────
 CREATE TABLE IF NOT EXISTS events (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   host        TEXT NOT NULL,
   event_id    TEXT,
   event_type  TEXT,
-  severity    TEXT NOT NULL DEFAULT 'low'
-              CHECK(severity IN ('critical','high','medium','low','info')),
+  severity    TEXT NOT NULL DEFAULT 'information'
+              CHECK(severity IN ('error','failure','warning','information','success')),
   user        TEXT,
   description TEXT,
   detected_at TEXT NOT NULL,
