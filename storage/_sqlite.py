@@ -69,10 +69,10 @@ def insert_event(conn, r: dict) -> int:
     sql = """
         INSERT INTO events
           (host, event_id, event_type, severity, user,
-           description, detected_at, raw_hash, source_file)
+           display_name, detected_at, raw_hash, source_file)
         VALUES
           (:host, :event_id, :event_type, :severity, :user,
-           :description, :detected_at, :raw_hash, :source_file)
+           :display_name, :detected_at, :raw_hash, :source_file)
     """
     r.setdefault("source_file", None)
     cursor = conn.cursor()

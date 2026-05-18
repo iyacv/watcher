@@ -12,7 +12,7 @@ set "ROOT=%~dp0"
 set "BUNDLED_PY=%ROOT%python\python.exe"
 set "BUNDLED_PYW=%ROOT%python\pythonw.exe"
 
-:: ── Mode detection: bundled (portable) vs system (dev) ──────────────────────
+:: ── Mode detection: bundled (client ZIP) vs system (dev) ────────────────────
 if exist "%BUNDLED_PY%" (
     set "PYTHON=%BUNDLED_PY%"
     set "PYTHONW=%BUNDLED_PYW%"
@@ -63,29 +63,39 @@ if exist "%ROOT%.env" (
     )
 )
 
+:prompt_url
 echo.
-echo       This watcher writes to a shared Supabase Postgres database.
-echo       Paste the DATABASE_URL provided by your administrator.
+echo       This watcher uploads logs to a shared Supabase database.
+echo       Your administrator should have sent you a DATABASE_URL.
 echo.
 echo       It looks like:
 echo         postgresql://postgres.xxxx:PASSWORD@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres
 echo.
-set /p "DBURL=       DATABASE_URL: "
+set "DBURL="
+set /p "DBURL=       Paste DATABASE_URL here and press Enter: "
 
 if "!DBURL!"=="" (
-    echo ERROR: No DATABASE_URL entered. Aborting.
-    pause & exit /b 1
+    echo       ERROR: No URL entered. Try again or close this window to cancel.
+    goto :prompt_url
+)
+
+:: Light validation — must start with postgresql:// or postgres://
+echo !DBURL! | findstr /b /r "postgres" >nul 2>&1
+if errorlevel 1 (
+    echo       ERROR: That doesn't look like a Postgres URL.
+    echo       It should start with 'postgresql://' or 'postgres://'.
+    goto :prompt_url
 )
 
 :: Write a fresh .env with the pasted URL
 > "%ROOT%.env" echo DATABASE_URL=!DBURL!
 >> "%ROOT%.env" echo KEEP_PROCESSED=false
-echo       Saved connection string to .env
+echo       Saved connection to .env
 
 :env_done
 echo.
 
-:: ── 5. Register watcher auto-start (no admin required, runs on user logon) ─
+:: ── 5. Register watcher auto-start (Task Scheduler, runs on user logon) ─────
 echo [5/5] Registering watcher auto-start (Task Scheduler, on user logon)...
 schtasks /delete /tn "NYKFilWatcher" /f >nul 2>&1
 :: Use cmd /c to set the working directory before launching pythonw, so the
@@ -96,28 +106,37 @@ schtasks /create /tn "NYKFilWatcher" ^
     /sc onlogon /f >nul
 if errorlevel 1 (
     echo       WARNING: could not register watcher auto-start.
+    echo       You can still run watcher.py manually.
 ) else (
     echo       Watcher auto-start registered.
 )
 echo.
 
-:: ── Start now ───────────────────────────────────────────────────────────────
-echo Starting watcher...
+:: ── Start the watcher now ───────────────────────────────────────────────────
+echo Starting watcher in the background...
 schtasks /run /tn "NYKFilWatcher" >nul 2>&1
 echo.
 
 echo ============================================
 echo  Setup complete.
 echo.
-echo  Drop F5 / Log360 export files into:
-echo    %ROOT%inbox\
+echo  HOW TO USE:
+echo    Drop F5 / Log360 export files (.xml .xlsx .json) into:
+echo      %ROOT%inbox\
 echo.
-echo  All data is written to the shared Supabase database.
+echo    The watcher picks them up automatically and uploads
+echo    them to the shared Supabase database.
 echo.
-echo  View the dashboard in your browser:
-echo    Grafana Cloud (URL provided by your administrator)
+echo  DASHBOARD:
+echo    View the live dashboard in your browser at the
+echo    Grafana Cloud URL provided by your administrator.
 echo.
-echo  To uninstall: schtasks /delete /tn "NYKFilWatcher" /f
+echo  TO STOP THE WATCHER:
+echo    schtasks /end /tn "NYKFilWatcher"
+echo.
+echo  TO UNINSTALL:
+echo    schtasks /delete /tn "NYKFilWatcher" /f
+echo    Then delete this folder.
 echo ============================================
 echo.
 

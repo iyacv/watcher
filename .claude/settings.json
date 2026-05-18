@@ -14,7 +14,8 @@
       "Bash(python storage/init_db.py)",
       "Bash(python -c ' *)",
       "Bash(python -c \"import json; d=json.load\\(open\\('grafana/dashboard.json'\\)\\); print\\('panels:', len\\(d.get\\('panels',[]\\)\\)\\); print\\('templating vars:', len\\(d.get\\('templating',{}\\).get\\('list',[]\\)\\)\\); import sys; sys.stdout.write\\(json.dumps\\(d.get\\('templating',{}\\), indent=2\\)[:1500]\\)\")",
-      "Bash(python)"
+      "Bash(python)",
+      "PowerShell(powershell -ExecutionPolicy Bypass -File d:\\\\Riann\\\\capstone\\\\watcher\\\\build\\\\build.ps1)"
     ],
     "additionalDirectories": [
       "D:\\Riann\\capstone\\watcher\\dist\\NYKFilWatcher"

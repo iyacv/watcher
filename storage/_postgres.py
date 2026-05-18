@@ -90,10 +90,10 @@ def insert_event(conn, r: dict) -> int:
     sql = """
         INSERT INTO events
           (host, event_id, event_type, severity, "user",
-           description, detected_at, raw_hash, source_file)
+           display_name, detected_at, raw_hash, source_file)
         VALUES
           (%(host)s, %(event_id)s, %(event_type)s, %(severity)s, %(user)s,
-           %(description)s, %(detected_at)s, %(raw_hash)s, %(source_file)s)
+           %(display_name)s, %(detected_at)s, %(raw_hash)s, %(source_file)s)
         ON CONFLICT (raw_hash) DO NOTHING
         RETURNING id
     """

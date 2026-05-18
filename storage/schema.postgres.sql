@@ -42,8 +42,8 @@ CREATE TABLE IF NOT EXISTS events (
   event_type  TEXT,
   severity    TEXT NOT NULL DEFAULT 'information'
               CHECK (severity IN ('error','failure','warning','information','success')),
-  "user"      TEXT,
-  description TEXT,
+  "user"       TEXT,
+  display_name TEXT,
   detected_at TIMESTAMPTZ NOT NULL,
   raw_hash    TEXT NOT NULL UNIQUE,
   source_file TEXT,

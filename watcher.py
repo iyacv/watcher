@@ -6,9 +6,11 @@ Usage: python watcher.py
 import time
 import shutil
 import logging
+import logging.handlers
 import os
 import sys
 import threading
+from datetime import datetime
 from pathlib import Path
 
 # Ensure this script's directory is importable even when launched from
@@ -29,11 +31,24 @@ from pipeline.prioritizer import prioritize
 from pipeline.correlator import correlate
 from storage.db import insert_vulnerability, insert_event, flag_correlation, get_connection
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
+_LOG_FILE = _HERE / "watcher.log"
+_log_fmt = logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
+
+# Rotating file handler: keeps history so success/failure is provable even
+# though the watcher runs hidden via Task Scheduler (no visible console).
+_file_handler = logging.handlers.RotatingFileHandler(
+    _LOG_FILE, maxBytes=1_000_000, backupCount=3, encoding="utf-8"
+)
+_file_handler.setFormatter(_log_fmt)
+
+# Console handler too, for when the watcher is run manually from a terminal.
+_console_handler = logging.StreamHandler()
+_console_handler.setFormatter(_log_fmt)
+
+logging.basicConfig(level=logging.INFO, handlers=[_file_handler, _console_handler])
 log = logging.getLogger(__name__)
 
 
@@ -147,6 +162,15 @@ def process_file(filepath: str):
         try:
             dest = Path(config.FAILED_DIR) / path.name
             shutil.move(filepath, dest)
+            # Drop a plain-English reason beside the failed file so anyone
+            # browsing failed/ sees *why* without reading the watcher log.
+            note = dest.with_suffix(dest.suffix + ".error.txt")
+            note.write_text(
+                f"File:   {path.name}\n"
+                f"Failed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"Reason: {type(exc).__name__}: {exc}\n",
+                encoding="utf-8",
+            )
         except FileNotFoundError:
             pass
     finally:

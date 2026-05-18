@@ -23,94 +23,6 @@
   "cursorSync": "Off",
   "editable": true,
   "elements": {
-    "panel-1": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${datasource}"
-                    },
-                    "group": "postgres",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "format": "table",
-                      "rawSql": "SELECT (SELECT COUNT(*) FROM vulnerabilities) + (SELECT COUNT(*) FROM events) AS value"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 1,
-        "links": [],
-        "title": "Total Logs",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                }
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "none",
-              "graphMode": "area",
-              "justifyMode": "center",
-              "orientation": "auto",
-              "percentChangeColorMode": "standard",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "showPercentChange": false,
-              "textMode": "auto",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "blue",
-                    "value": 0
-                  }
-                ]
-              },
-              "wideLayout": true
-            }
-          },
-          "version": "13.1.0-25668120414"
-        }
-      }
-    },
     "panel-10": {
       "kind": "Panel",
       "spec": {
@@ -132,7 +44,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT source_file AS \"Source File\", host AS \"Host\", name AS \"Vulnerability\",\r\n       severity AS \"Severity\", cvss AS \"CVSS\",\r\n       status AS \"Status\", detected_at AS \"Detected\"\r\nFROM vulnerabilities\r\nWHERE host ~ '${host:regex}'\r\nORDER BY CASE severity\r\n           WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3\r\n           WHEN 'low' THEN 4 WHEN 'info' THEN 5 ELSE 6 END,\r\n         detected_at DESC\r\nLIMIT 200\r\n",
+                      "rawSql": "SELECT source_file AS \"Source File\", host AS \"Host\", name AS \"Vulnerability\",\r\n       severity AS \"Severity\", cvss AS \"CVSS\",\r\n       status AS \"Status\", detected_at AS \"Detected\"\r\nFROM vulnerabilities\r\nWHERE host ~ '${host:regex}'\r\n  AND '$view' = 'f5'\r\nORDER BY CASE severity\r\n           WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3\r\n           WHEN 'low' THEN 4 WHEN 'info' THEN 5 ELSE 6 END,\r\n         detected_at DESC\r\nLIMIT 200\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -164,7 +76,7 @@
         "description": "",
         "id": 10,
         "links": [],
-        "title": "F5 Vulnerabilities",
+        "title": "Overall F5 Vulnerabilities",
         "vizConfig": {
           "group": "table",
           "kind": "VizConfig",
@@ -217,7 +129,7 @@
                   "properties": [
                     {
                       "id": "custom.width",
-                      "value": 114
+                      "value": 95
                     }
                   ]
                 },
@@ -229,7 +141,7 @@
                   "properties": [
                     {
                       "id": "custom.width",
-                      "value": 96
+                      "value": 86
                     }
                   ]
                 },
@@ -271,6 +183,19 @@
                       "value": 320
                     }
                   ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Status",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 92
+                    }
+                  ]
                 }
               ]
             },
@@ -285,83 +210,7 @@
               ]
             }
           },
-          "version": "13.1.0-25668120414"
-        }
-      }
-    },
-    "panel-11": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "${datasource}"
-                    },
-                    "group": "postgres",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "format": "table",
-                      "rawSql": "SELECT host AS \"Host\", vuln_id AS \"CVE / ID\", event_type AS \"Suspicious Event\", severity AS \"Severity\", vuln_time AS \"Vuln Time\", event_time AS \"Event Time\", created_at AS \"Correlated At\" FROM correlations ORDER BY created_at DESC LIMIT 100"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 11,
-        "links": [],
-        "title": "Correlations — Possible Active Exploitation",
-        "vizConfig": {
-          "group": "table",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "custom": {
-                  "align": "auto",
-                  "cellOptions": {
-                    "type": "auto"
-                  },
-                  "footer": {
-                    "reducers": []
-                  },
-                  "inspect": false
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                }
-              },
-              "overrides": []
-            },
-            "options": {
-              "cellHeight": "sm",
-              "showHeader": true
-            }
-          },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -386,7 +235,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT host AS \"Host\", event_id AS \"Event ID\", event_type AS \"Event Type\",\r\n       severity AS \"Severity\", detected_at AS \"Detected\",\r\n       description AS \"Description\"\r\nFROM events\r\nWHERE detected_at >= '${__from:date:iso}' AND detected_at <= '${__to:date:iso}'\r\nORDER BY CASE severity\r\n           WHEN 'error'       THEN 1\r\n           WHEN 'failure'     THEN 2\r\n           WHEN 'warning'     THEN 3\r\n           WHEN 'information' THEN 4\r\n           WHEN 'success'     THEN 5\r\n           ELSE 6 END,\r\n         detected_at DESC\r\n\r\n",
+                      "rawSql": "SELECT host AS \"Host\",\r\n       event_id AS \"Event ID\",\r\n       event_type AS \"Event Type\",\r\n       severity AS \"Severity\",\r\n       detected_at AS \"Detected\"\r\nFROM events\r\nWHERE $__timeFilter(created_at)\r\n  AND '$view' = 'log360'\r\nORDER BY CASE severity\r\n           WHEN 'error'       THEN 1\r\n           WHEN 'failure'     THEN 2\r\n           WHEN 'warning'     THEN 3\r\n           WHEN 'information' THEN 4\r\n           WHEN 'success'     THEN 5\r\n           ELSE 6 END,\r\n         detected_at DESC\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -418,7 +267,7 @@
         "description": "",
         "id": 12,
         "links": [],
-        "title": "Recent Log360 Events",
+        "title": "Overall Log360 Events",
         "vizConfig": {
           "group": "table",
           "kind": "VizConfig",
@@ -460,7 +309,7 @@
                   "properties": [
                     {
                       "id": "custom.width",
-                      "value": 114
+                      "value": 362
                     }
                   ]
                 },
@@ -473,7 +322,7 @@
                   "properties": [
                     {
                       "id": "custom.width",
-                      "value": 300
+                      "value": 336
                     }
                   ]
                 },
@@ -486,7 +335,7 @@
                   "properties": [
                     {
                       "id": "custom.width",
-                      "value": 187
+                      "value": 100
                     }
                   ]
                 },
@@ -525,7 +374,7 @@
                   "properties": [
                     {
                       "id": "custom.width",
-                      "value": 443
+                      "value": 201
                     }
                   ]
                 }
@@ -542,7 +391,7 @@
               ]
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -582,77 +431,52 @@
         "links": [],
         "title": "Ingestion Status — Files Imported to Dashboard",
         "vizConfig": {
-          "group": "table",
+          "group": "logs",
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "custom": {
-                  "align": "auto",
-                  "cellOptions": {
-                    "type": "auto"
-                  },
-                  "filterable": true,
-                  "footer": {
-                    "reducers": []
-                  },
-                  "inspect": false
-                },
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                }
-              },
+              "defaults": {},
               "overrides": [
                 {
                   "matcher": {
                     "id": "byName",
                     "options": "File"
                   },
-                  "properties": [
-                    {
-                      "id": "custom.width",
-                      "value": 406
-                    }
-                  ]
+                  "properties": []
                 },
                 {
                   "matcher": {
                     "id": "byName",
                     "options": "Type"
                   },
-                  "properties": [
-                    {
-                      "id": "custom.width",
-                      "value": 130
-                    }
-                  ]
+                  "properties": []
                 },
                 {
                   "matcher": {
                     "id": "byName",
                     "options": "Records"
                   },
-                  "properties": [
-                    {
-                      "id": "custom.width",
-                      "value": 100
-                    }
-                  ]
+                  "properties": []
                 }
               ]
             },
             "options": {
-              "cellHeight": "sm",
-              "showHeader": true
+              "dedupStrategy": "none",
+              "enableInfiniteScrolling": false,
+              "enableLogDetails": true,
+              "prettifyLogMessage": true,
+              "showControls": false,
+              "showFieldSelector": false,
+              "showLevel": true,
+              "showLogAttributes": true,
+              "showTime": false,
+              "sortOrder": "Descending",
+              "timestampResolution": "ms",
+              "unwrappedColumns": false,
+              "wrapLogMessage": false
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -677,7 +501,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT SUM(CASE WHEN severity='error'       THEN 1 ELSE 0 END) AS \"Error\",\r\n       SUM(CASE WHEN severity='failure'     THEN 1 ELSE 0 END) AS \"Failure\",\r\n       SUM(CASE WHEN severity='warning'     THEN 1 ELSE 0 END) AS \"Warning\",\r\n       SUM(CASE WHEN severity='information' THEN 1 ELSE 0 END) AS \"Information\",\r\n       SUM(CASE WHEN severity='success'     THEN 1 ELSE 0 END) AS \"Success\"\r\nFROM events\r\n",
+                      "rawSql": "SELECT\r\n  SUM(CASE WHEN severity='error'       THEN 1 ELSE 0 END) AS \"Error\",\r\n  SUM(CASE WHEN severity='failure'     THEN 1 ELSE 0 END) AS \"Failure\",\r\n  SUM(CASE WHEN severity='warning'     THEN 1 ELSE 0 END) AS \"Warning\",\r\n  SUM(CASE WHEN severity='information' THEN 1 ELSE 0 END) AS \"Information\",\r\n  SUM(CASE WHEN severity='success'     THEN 1 ELSE 0 END) AS \"Success\"\r\nFROM events\r\nWHERE $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -841,7 +665,7 @@
               }
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -866,7 +690,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT COUNT(*) AS value FROM events WHERE severity='success'\r\n",
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM events\r\nWHERE severity = 'success'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -948,7 +772,7 @@
               "wideLayout": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -973,7 +797,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT COUNT(*) AS value FROM events WHERE severity='information'\r\n",
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM events\r\nWHERE severity = 'information'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -1054,7 +878,7 @@
               "wideLayout": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -1079,7 +903,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT COUNT(*) AS value FROM events WHERE severity='warning'\r\n",
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM events\r\nWHERE severity = 'warning'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -1160,7 +984,7 @@
               "wideLayout": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -1185,7 +1009,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT COUNT(*) AS value FROM events WHERE severity='failure'\r\n",
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM events\r\nWHERE severity = 'failure'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -1263,7 +1087,7 @@
               "wideLayout": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -1288,7 +1112,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT COUNT(*) AS value FROM events WHERE severity='error'\r\n",
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM events\r\nWHERE severity = 'error'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -1366,7 +1190,7 @@
               "wideLayout": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -1391,7 +1215,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT COUNT(*) AS value FROM vulnerabilities WHERE severity='critical'\r\n",
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM vulnerabilities\r\nWHERE severity = 'critical'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -1472,11 +1296,11 @@
               "wideLayout": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
-    "panel-20": {
+    "panel-21": {
       "kind": "Panel",
       "spec": {
         "data": {
@@ -1498,7 +1322,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT\r\n  v.host AS \"Host\",\r\n  v.name AS \"Vulnerability\",\r\n  c.old_severity AS \"Was\",\r\n  c.new_severity AS \"Now\",\r\n  c.changed_at AS \"Changed At\"\r\nFROM vulnerability_changes c\r\nJOIN vulnerabilities v ON v.raw_hash = c.vuln_hash\r\nWHERE v.host ~ '${host:regex}'\r\nORDER BY c.changed_at DESC\r\nLIMIT 50\r\n",
+                      "rawSql": "WITH latest AS (\r\n  SELECT source_file FROM events\r\n  WHERE source_file IS NOT NULL\r\n    AND '$view' = 'log360'\r\n  ORDER BY created_at DESC LIMIT 1\r\n),\r\nnew_counts AS (\r\n  SELECT host,\r\n    SUM(CASE WHEN severity='error'   THEN 1 ELSE 0 END) AS new_err,\r\n    SUM(CASE WHEN severity='failure' THEN 1 ELSE 0 END) AS new_fail,\r\n    SUM(CASE WHEN severity='warning' THEN 1 ELSE 0 END) AS new_warn\r\n  FROM events WHERE source_file = (SELECT source_file FROM latest)\r\n  GROUP BY host\r\n),\r\nprev_counts AS (\r\n  SELECT host,\r\n    SUM(CASE WHEN severity='error'   THEN 1 ELSE 0 END) AS prev_err,\r\n    SUM(CASE WHEN severity='failure' THEN 1 ELSE 0 END) AS prev_fail,\r\n    SUM(CASE WHEN severity='warning' THEN 1 ELSE 0 END) AS prev_warn\r\n  FROM events\r\n  WHERE source_file IS NOT NULL\r\n    AND source_file <> (SELECT source_file FROM latest)\r\n  GROUP BY host\r\n)\r\nSELECT\r\n  COALESCE(n.host, p.host) AS \"Host\",\r\n  COALESCE(p.prev_err, 0)  AS \"Prev Errors\",\r\n  COALESCE(n.new_err, 0)   AS \"New Errors\",\r\n  COALESCE(p.prev_fail, 0) AS \"Prev Failures\",\r\n  COALESCE(n.new_fail, 0)  AS \"New Failures\",\r\n  COALESCE(p.prev_warn, 0) AS \"Prev Warnings\",\r\n  COALESCE(n.new_warn, 0)  AS \"New Warnings\",\r\n  CASE\r\n    WHEN (COALESCE(n.new_err,0) + COALESCE(n.new_fail,0)) >\r\n         (COALESCE(p.prev_err,0) + COALESCE(p.prev_fail,0)) THEN 'worse'\r\n    WHEN (COALESCE(n.new_err,0) + COALESCE(n.new_fail,0)) <\r\n         (COALESCE(p.prev_err,0) + COALESCE(p.prev_fail,0)) THEN 'better'\r\n    ELSE 'same'\r\n  END AS \"Trend\"\r\nFROM new_counts n\r\nFULL OUTER JOIN prev_counts p ON p.host = n.host\r\nORDER BY\r\n  CASE WHEN (COALESCE(n.new_err,0) + COALESCE(n.new_fail,0)) >\r\n            (COALESCE(p.prev_err,0) + COALESCE(p.prev_fail,0)) THEN 0 ELSE 1 END,\r\n  COALESCE(n.new_err, 0) + COALESCE(n.new_fail, 0) DESC\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -1528,9 +1352,9 @@
           }
         },
         "description": "",
-        "id": 20,
+        "id": 21,
         "links": [],
-        "title": "Breakdown F5 Severity Escalation",
+        "title": "Event Logs Trend",
         "vizConfig": {
           "group": "table",
           "kind": "VizConfig",
@@ -1591,6 +1415,97 @@
                       "value": 83
                     }
                   ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Host",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 135
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Prev Errors",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 113
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "New Errors",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 120
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Prev Failures",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 128
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "New Failures",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 117
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Prev Warnings",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 121
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "New Warnings",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 109
+                    }
+                  ]
                 }
               ]
             },
@@ -1599,7 +1514,7 @@
               "showHeader": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -1624,7 +1539,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "WITH top_hosts AS (\r\n  SELECT host, COUNT(*) AS total\r\n  FROM events\r\n  WHERE host IS NOT NULL\r\n  GROUP BY host\r\n  ORDER BY total DESC\r\n  LIMIT 15\r\n)\r\nSELECT\r\n  e.host AS \"Host\",\r\n  SUM(CASE WHEN e.severity='error'       THEN 1 ELSE 0 END) AS \"Error\",\r\n  SUM(CASE WHEN e.severity='failure'     THEN 1 ELSE 0 END) AS \"Failure\",\r\n  SUM(CASE WHEN e.severity='warning'     THEN 1 ELSE 0 END) AS \"Warning\",\r\n  SUM(CASE WHEN e.severity='information' THEN 1 ELSE 0 END) AS \"Information\",\r\n  SUM(CASE WHEN e.severity='success'     THEN 1 ELSE 0 END) AS \"Success\"\r\nFROM events e\r\nJOIN top_hosts t ON t.host = e.host\r\nGROUP BY e.host, t.total\r\nORDER BY t.total DESC\r\n",
+                      "rawSql": "WITH top_hosts AS (\r\n  SELECT host, COUNT(*) AS total\r\n  FROM events\r\n  WHERE host IS NOT NULL\r\n    AND $__timeFilter(created_at)\r\n  GROUP BY host\r\n  ORDER BY total DESC\r\n  LIMIT 10\r\n)\r\nSELECT\r\n  e.host AS \"Host\",\r\n  SUM(CASE WHEN e.severity='error'       THEN 1 ELSE 0 END) AS \"Error\",\r\n  SUM(CASE WHEN e.severity='failure'     THEN 1 ELSE 0 END) AS \"Failure\",\r\n  SUM(CASE WHEN e.severity='warning'     THEN 1 ELSE 0 END) AS \"Warning\",\r\n  SUM(CASE WHEN e.severity='information' THEN 1 ELSE 0 END) AS \"Information\",\r\n  SUM(CASE WHEN e.severity='success'     THEN 1 ELSE 0 END) AS \"Success\"\r\nFROM events e\r\nJOIN top_hosts t ON t.host = e.host\r\nWHERE $__timeFilter(e.created_at)\r\n  AND '$view' IN ('main','log360')\r\nGROUP BY e.host, t.total\r\nORDER BY t.total DESC\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -1653,10 +1568,10 @@
             "transformations": []
           }
         },
-        "description": "Top 15 hosts by total Log360 event volume, stacked by severity. Quickly spot the noisiest hosts and the makeup of their activity.",
+        "description": "",
         "id": 22,
         "links": [],
-        "title": "Log360 — Top Hosts by Event Volume",
+        "title": "Top 10 Device by Event Volume",
         "vizConfig": {
           "group": "barchart",
           "kind": "VizConfig",
@@ -1672,7 +1587,7 @@
                   "axisColorMode": "text",
                   "axisLabel": "",
                   "axisPlacement": "auto",
-                  "fillOpacity": 85,
+                  "fillOpacity": 61,
                   "gradientMode": "none",
                   "hideFrom": {
                     "legend": false,
@@ -1680,6 +1595,214 @@
                     "viz": false
                   },
                   "lineWidth": 1,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "decimals": 0,
+                "fieldMinMax": false,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Success",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "dark-green",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Information",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "green",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Warning",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "light-orange",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Failure",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "semi-dark-red",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Error",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "super-light-red",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": {
+              "barRadius": 0,
+              "barWidth": 0.83,
+              "fullHighlight": false,
+              "groupWidth": 0.7,
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "right",
+                "showLegend": true
+              },
+              "orientation": "horizontal",
+              "showValue": "never",
+              "stacking": "normal",
+              "text": {},
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "multi",
+                "sort": "desc"
+              },
+              "xTickLabelRotation": 0,
+              "xTickLabelSpacing": 0
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-23": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "fflwhefjxboxse"
+                    },
+                    "group": "grafana-postgresql-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "dataset": "postgres",
+                      "editorMode": "code",
+                      "format": "time_series",
+                      "rawQuery": true,
+                      "rawSql": "SELECT\r\n  $__timeGroupAlias(detected_at, '1h'),\r\n  severity,\r\n  COUNT(*) AS count\r\nFROM events\r\nWHERE $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\nGROUP BY 1, severity\r\nORDER BY 1\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "Log360",
+        "id": 23,
+        "links": [],
+        "title": "Events by Severity ",
+        "vizConfig": {
+          "group": "barchart",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "fillOpacity": 100,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineWidth": 0,
                   "scaleDistribution": {
                     "type": "linear"
                   },
@@ -1697,87 +1820,11 @@
                   ]
                 }
               },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Error"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "super-light-red",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Failure"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "semi-dark-red",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Warning"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "light-orange",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Information"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "green",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Success"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "dark-green",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                }
-              ]
+              "overrides": []
             },
             "options": {
-              "barRadius": 0,
-              "barWidth": 0.7,
+              "barRadius": 0.05,
+              "barWidth": 0.95,
               "fullHighlight": false,
               "groupWidth": 0.8,
               "legend": {
@@ -1787,23 +1834,23 @@
                 "showLegend": true
               },
               "orientation": "horizontal",
-              "showValue": "auto",
+              "showValue": "never",
               "stacking": "normal",
               "tooltip": {
                 "hideZeros": false,
                 "mode": "multi",
-                "sort": "desc"
+                "sort": "none"
               },
-              "xField": "Host",
+              "xField": "time",
               "xTickLabelRotation": 0,
-              "xTickLabelSpacing": 0
+              "xTickLabelSpacing": 100
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
-    "panel-21": {
+    "panel-25": {
       "kind": "Panel",
       "spec": {
         "data": {
@@ -1824,7 +1871,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "WITH latest AS (\r\n  SELECT source_file FROM events\r\n  WHERE source_file IS NOT NULL\r\n  ORDER BY created_at DESC LIMIT 1\r\n),\r\nnew_counts AS (\r\n  SELECT host,\r\n    SUM(CASE WHEN severity='error'   THEN 1 ELSE 0 END) AS new_err,\r\n    SUM(CASE WHEN severity='failure' THEN 1 ELSE 0 END) AS new_fail,\r\n    SUM(CASE WHEN severity='warning' THEN 1 ELSE 0 END) AS new_warn\r\n  FROM events WHERE source_file = (SELECT source_file FROM latest)\r\n  GROUP BY host\r\n),\r\nprev_counts AS (\r\n  SELECT host,\r\n    SUM(CASE WHEN severity='error'   THEN 1 ELSE 0 END) AS prev_err,\r\n    SUM(CASE WHEN severity='failure' THEN 1 ELSE 0 END) AS prev_fail,\r\n    SUM(CASE WHEN severity='warning' THEN 1 ELSE 0 END) AS prev_warn\r\n  FROM events\r\n  WHERE source_file IS NOT NULL\r\n    AND source_file <> (SELECT source_file FROM latest)\r\n  GROUP BY host\r\n)\r\nSELECT\r\n  COALESCE(n.host, p.host) AS \"Host\",\r\n  COALESCE(p.prev_err, 0)  AS \"Prev Errors\",\r\n  COALESCE(n.new_err, 0)   AS \"New Errors\",\r\n  COALESCE(p.prev_fail, 0) AS \"Prev Failures\",\r\n  COALESCE(n.new_fail, 0)  AS \"New Failures\",\r\n  COALESCE(p.prev_warn, 0) AS \"Prev Warnings\",\r\n  COALESCE(n.new_warn, 0)  AS \"New Warnings\",\r\n  CASE\r\n    WHEN (COALESCE(n.new_err,0) + COALESCE(n.new_fail,0)) >\r\n         (COALESCE(p.prev_err,0) + COALESCE(p.prev_fail,0)) THEN 'worse'\r\n    WHEN (COALESCE(n.new_err,0) + COALESCE(n.new_fail,0)) <\r\n         (COALESCE(p.prev_err,0) + COALESCE(p.prev_fail,0)) THEN 'better'\r\n    ELSE 'same'\r\n  END AS \"Trend\"\r\nFROM new_counts n\r\nFULL OUTER JOIN prev_counts p ON p.host = n.host\r\nORDER BY\r\n  CASE WHEN (COALESCE(n.new_err,0) + COALESCE(n.new_fail,0)) >\r\n            (COALESCE(p.prev_err,0) + COALESCE(p.prev_fail,0)) THEN 0 ELSE 1 END,\r\n  COALESCE(n.new_err, 0) + COALESCE(n.new_fail, 0) DESC\r\nLIMIT 200\r\n",
+                      "rawSql": "SELECT\r\n  CASE\r\n    WHEN '$view' = 'f5' THEN\r\n      (SELECT COUNT(*) FROM vulnerabilities WHERE $__timeFilter(created_at))\r\n    WHEN '$view' = 'log360' THEN\r\n      (SELECT COUNT(*) FROM events WHERE $__timeFilter(created_at))\r\n    ELSE\r\n      (SELECT COUNT(*) FROM vulnerabilities WHERE $__timeFilter(created_at))\r\n      +\r\n      (SELECT COUNT(*) FROM events WHERE $__timeFilter(created_at))\r\n  END AS value\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -1853,27 +1900,16 @@
             "transformations": []
           }
         },
-        "description": "Per-host comparison: error/failure/warning counts in the latest Log360 upload vs. all prior uploads. Trend column flags hosts getting worse.",
-        "id": 21,
+        "description": "",
+        "id": 25,
         "links": [],
-        "title": "Log360 — Severity Shifts by Host",
+        "title": "Total Logs",
         "vizConfig": {
-          "group": "table",
+          "group": "stat",
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
               "defaults": {
-                "custom": {
-                  "align": "auto",
-                  "cellOptions": {
-                    "type": "auto"
-                  },
-                  "filterable": true,
-                  "footer": {
-                    "reducers": []
-                  },
-                  "inspect": false
-                },
                 "thresholds": {
                   "mode": "absolute",
                   "steps": [
@@ -1888,57 +1924,462 @@
                   ]
                 }
               },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Severity"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.width",
-                      "value": 114
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Event ID"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.width",
-                      "value": 130
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Host"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.width",
-                      "value": 180
-                    }
-                  ]
-                }
-              ]
+              "overrides": []
             },
             "options": {
-              "cellHeight": "sm",
-              "showHeader": true,
-              "sortBy": [
-                {
-                  "desc": true,
-                  "displayName": "Detected"
-                }
-              ]
+              "colorMode": "none",
+              "graphMode": "area",
+              "justifyMode": "center",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-26": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT\r\n  CASE\r\n    WHEN '$view' = 'f5' THEN\r\n      (SELECT COUNT(*) FROM vulnerabilities WHERE $__timeFilter(created_at))\r\n    WHEN '$view' = 'log360' THEN\r\n      (SELECT COUNT(*) FROM events WHERE $__timeFilter(created_at))\r\n    ELSE\r\n      (SELECT COUNT(*) FROM vulnerabilities WHERE $__timeFilter(created_at))\r\n      +\r\n      (SELECT COUNT(*) FROM events WHERE $__timeFilter(created_at))\r\n  END AS value\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 26,
+        "links": [],
+        "title": "Total Logs",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "none",
+              "graphMode": "area",
+              "justifyMode": "center",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-27": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT\r\n  CASE\r\n    WHEN '$view' = 'f5' THEN\r\n      (SELECT COUNT(*) FROM vulnerabilities WHERE $__timeFilter(created_at))\r\n    WHEN '$view' = 'log360' THEN\r\n      (SELECT COUNT(*) FROM events WHERE $__timeFilter(created_at))\r\n    ELSE\r\n      (SELECT COUNT(*) FROM vulnerabilities WHERE $__timeFilter(created_at))\r\n      +\r\n      (SELECT COUNT(*) FROM events WHERE $__timeFilter(created_at))\r\n  END AS value\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 27,
+        "links": [],
+        "title": "Total Logs",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "none",
+              "graphMode": "area",
+              "justifyMode": "center",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "blue",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-28": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM vulnerabilities\r\nWHERE severity = 'critical'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 28,
+        "links": [],
+        "title": "F5 Critical",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "dark-red"
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "center",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "dark-red",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-29": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM vulnerabilities\r\nWHERE severity = 'high'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 29,
+        "links": [],
+        "title": "F5 High",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#e16e7b",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "center",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "value",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "orange",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
+            }
+          },
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -1963,7 +2404,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT COUNT(*) AS value FROM vulnerabilities WHERE severity='high'\r\n",
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM vulnerabilities\r\nWHERE severity = 'high'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -2044,7 +2485,1184 @@
               "wideLayout": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-30": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM vulnerabilities\r\nWHERE severity = 'medium'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 30,
+        "links": [],
+        "title": "F5 Medium",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "semi-dark-orange"
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "yellow",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-31": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM vulnerabilities\r\nWHERE severity = 'low'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 31,
+        "links": [],
+        "title": "F5 Low",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "semi-dark-green",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-32": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT name AS \"Vulnerability\", COUNT(*) AS count\r\nFROM vulnerabilities\r\nWHERE $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\nGROUP BY name\r\nORDER BY count DESC\r\nLIMIT 10\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 32,
+        "links": [],
+        "title": "Top Recurring Issues (F5 Vulnerabilities)",
+        "vizConfig": {
+          "group": "barchart",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "#4868aa",
+                  "mode": "fixed"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "fillOpacity": 80,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineWidth": 1,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "decimals": 0,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "semi-dark-blue",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "barRadius": 0,
+              "barWidth": 0.5,
+              "colorByField": "count",
+              "fullHighlight": false,
+              "groupWidth": 0.7,
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "orientation": "horizontal",
+              "showValue": "always",
+              "stacking": "none",
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              },
+              "xTickLabelRotation": 0,
+              "xTickLabelSpacing": 0
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-33": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT\r\n  SUM(CASE WHEN severity='critical' THEN 1 ELSE 0 END) AS \"Critical\",\r\n  SUM(CASE WHEN severity='high'     THEN 1 ELSE 0 END) AS \"High\",\r\n  SUM(CASE WHEN severity='medium'   THEN 1 ELSE 0 END) AS \"Medium\",\r\n  SUM(CASE WHEN severity='low'      THEN 1 ELSE 0 END) AS \"Low\",\r\n  SUM(CASE WHEN severity='info'     THEN 1 ELSE 0 END) AS \"Info\"\r\nFROM vulnerabilities\r\nWHERE $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 33,
+        "links": [],
+        "title": "F5 Severity Breakdown",
+        "vizConfig": {
+          "group": "piechart",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "#73BF69",
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  }
+                }
+              },
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Critical"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "dark-red",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "High"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "light-red",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Medium"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "orange",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Low"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "green",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Info"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "blue",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": {
+              "displayLabels": [
+                "name",
+                "percent"
+              ],
+              "legend": {
+                "displayMode": "table",
+                "placement": "right",
+                "showLegend": true,
+                "values": [
+                  "value",
+                  "percent"
+                ]
+              },
+              "pieType": "pie",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "sort": "desc",
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-34": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM events\r\nWHERE severity = 'success'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "Log360",
+        "id": 34,
+        "links": [],
+        "title": "Success",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "#ad46ff",
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "dark-green",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "none",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "dark-red",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-35": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM events\r\nWHERE severity = 'information'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "Log360",
+        "id": 35,
+        "links": [],
+        "title": "Information",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "center",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "value",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "orange",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-36": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM events\r\nWHERE severity = 'warning'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "Log360",
+        "id": 36,
+        "links": [],
+        "title": "Warning",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "light-orange",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "yellow",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-37": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM events\r\nWHERE severity = 'failure'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "Log360",
+        "id": 37,
+        "links": [],
+        "title": "Failure",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-38": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM events\r\nWHERE severity = 'error'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "Log360",
+        "id": 38,
+        "links": [],
+        "title": "Error",
+        "vizConfig": {
+          "group": "stat",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "super-light-red",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "colorMode": "value",
+              "graphMode": "area",
+              "justifyMode": "auto",
+              "orientation": "auto",
+              "percentChangeColorMode": "standard",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "showPercentChange": false,
+              "textMode": "auto",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "wideLayout": true
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-39": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT event_type AS \"Event Type\", COUNT(*) AS count\r\nFROM events\r\nWHERE $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\nGROUP BY event_type\r\nORDER BY count DESC\r\nLIMIT 10\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 39,
+        "links": [],
+        "title": "Top Recurring Events (Log360)",
+        "vizConfig": {
+          "group": "barchart",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "#4868aa",
+                  "mode": "fixed"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "fillOpacity": 80,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineWidth": 1,
+                  "scaleDistribution": {
+                    "log": 2,
+                    "type": "log"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "barRadius": 0,
+              "barWidth": 0.5,
+              "colorByField": "count",
+              "fullHighlight": false,
+              "groupWidth": 0.7,
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "orientation": "horizontal",
+              "showValue": "always",
+              "stacking": "none",
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              },
+              "xTickLabelRotation": 0,
+              "xTickLabelSpacing": 0
+            }
+          },
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -2069,7 +3687,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT COUNT(*) AS value FROM vulnerabilities WHERE severity='medium'\r\n",
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM vulnerabilities\r\nWHERE severity = 'medium'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -2153,7 +3771,528 @@
               "wideLayout": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-40": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "SELECT\r\n  SUM(CASE WHEN severity='error'       THEN 1 ELSE 0 END) AS \"Error\",\r\n  SUM(CASE WHEN severity='failure'     THEN 1 ELSE 0 END) AS \"Failure\",\r\n  SUM(CASE WHEN severity='warning'     THEN 1 ELSE 0 END) AS \"Warning\",\r\n  SUM(CASE WHEN severity='information' THEN 1 ELSE 0 END) AS \"Information\",\r\n  SUM(CASE WHEN severity='success'     THEN 1 ELSE 0 END) AS \"Success\"\r\nFROM events\r\nWHERE $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 40,
+        "links": [],
+        "title": "Log360 Severity Breakdown",
+        "vizConfig": {
+          "group": "piechart",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "#73BF69",
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  }
+                }
+              },
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Success",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "dark-green",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Information",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "green",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Warning",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "light-orange",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Failure",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "semi-dark-red",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Error",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "super-light-red",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": {
+              "displayLabels": [
+                "name",
+                "percent"
+              ],
+              "legend": {
+                "displayMode": "table",
+                "placement": "right",
+                "showLegend": true,
+                "values": [
+                  "value",
+                  "percent"
+                ]
+              },
+              "pieType": "pie",
+              "reduceOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ],
+                "fields": "",
+                "values": false
+              },
+              "sort": "desc",
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "single",
+                "sort": "none"
+              }
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-41": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "fflwhefjxboxse"
+                    },
+                    "group": "grafana-postgresql-datasource",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "dataset": "postgres",
+                      "editorMode": "code",
+                      "format": "time_series",
+                      "rawQuery": true,
+                      "rawSql": "SELECT\r\n  $__timeGroupAlias(detected_at, '1h'),\r\n  severity,\r\n  COUNT(*) AS count\r\nFROM events\r\nWHERE $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\nGROUP BY 1, severity\r\nORDER BY 1\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "Log360",
+        "id": 41,
+        "links": [],
+        "title": "Events by Severity ",
+        "vizConfig": {
+          "group": "barchart",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "fillOpacity": 100,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineWidth": 0,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "options": {
+              "barRadius": 0.05,
+              "barWidth": 0.95,
+              "fullHighlight": false,
+              "groupWidth": 0.8,
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "orientation": "horizontal",
+              "showValue": "never",
+              "stacking": "normal",
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "multi",
+                "sort": "none"
+              },
+              "xField": "time",
+              "xTickLabelRotation": 0,
+              "xTickLabelSpacing": 100
+            }
+          },
+          "version": "13.1.0-25848649471"
+        }
+      }
+    },
+    "panel-42": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [
+              {
+                "kind": "PanelQuery",
+                "spec": {
+                  "hidden": false,
+                  "query": {
+                    "datasource": {
+                      "name": "${datasource}"
+                    },
+                    "group": "postgres",
+                    "kind": "DataQuery",
+                    "spec": {
+                      "editorMode": "code",
+                      "format": "table",
+                      "rawQuery": true,
+                      "rawSql": "WITH top_hosts AS (\r\n  SELECT host, COUNT(*) AS total\r\n  FROM events\r\n  WHERE host IS NOT NULL\r\n    AND $__timeFilter(created_at)\r\n  GROUP BY host\r\n  ORDER BY total DESC\r\n  LIMIT 10\r\n)\r\nSELECT\r\n  e.host AS \"Host\",\r\n  SUM(CASE WHEN e.severity='error'       THEN 1 ELSE 0 END) AS \"Error\",\r\n  SUM(CASE WHEN e.severity='failure'     THEN 1 ELSE 0 END) AS \"Failure\",\r\n  SUM(CASE WHEN e.severity='warning'     THEN 1 ELSE 0 END) AS \"Warning\",\r\n  SUM(CASE WHEN e.severity='information' THEN 1 ELSE 0 END) AS \"Information\",\r\n  SUM(CASE WHEN e.severity='success'     THEN 1 ELSE 0 END) AS \"Success\"\r\nFROM events e\r\nJOIN top_hosts t ON t.host = e.host\r\nWHERE $__timeFilter(e.created_at)\r\n  AND '$view' IN ('main','log360')\r\nGROUP BY e.host, t.total\r\nORDER BY t.total DESC\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
+                    },
+                    "version": "v0"
+                  },
+                  "refId": "A"
+                }
+              }
+            ],
+            "queryOptions": {},
+            "transformations": []
+          }
+        },
+        "description": "",
+        "id": 42,
+        "links": [],
+        "title": "Top 10 Device by Event Volume",
+        "vizConfig": {
+          "group": "barchart",
+          "kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisBorderShow": false,
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "fillOpacity": 61,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineWidth": 1,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "decimals": 0,
+                "fieldMinMax": false,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Success",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "dark-green",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Information",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "green",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Warning",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "light-orange",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Failure",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "semi-dark-red",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Error",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "color",
+                      "value": {
+                        "fixedColor": "super-light-red",
+                        "mode": "fixed"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "options": {
+              "barRadius": 0,
+              "barWidth": 0.83,
+              "fullHighlight": false,
+              "groupWidth": 0.7,
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "right",
+                "showLegend": true
+              },
+              "orientation": "horizontal",
+              "showValue": "never",
+              "stacking": "normal",
+              "text": {},
+              "tooltip": {
+                "hideZeros": false,
+                "mode": "multi",
+                "sort": "desc"
+              },
+              "xTickLabelRotation": 0,
+              "xTickLabelSpacing": 0
+            }
+          },
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -2178,7 +4317,7 @@
                       "editorMode": "code",
                       "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT COUNT(*) AS value FROM vulnerabilities WHERE severity='low'\r\n",
+                      "rawSql": "SELECT COUNT(*) AS value\r\nFROM vulnerabilities\r\nWHERE severity = 'low'\r\n  AND $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -2256,7 +4395,7 @@
               "wideLayout": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -2278,8 +4417,27 @@
                     "group": "postgres",
                     "kind": "DataQuery",
                     "spec": {
+                      "editorMode": "code",
                       "format": "table",
-                      "rawSql": "SELECT name AS \"Vulnerability\", COUNT(*) AS count FROM vulnerabilities GROUP BY name ORDER BY count DESC LIMIT 10"
+                      "rawQuery": true,
+                      "rawSql": "SELECT name AS \"Vulnerability\", COUNT(*) AS count\r\nFROM vulnerabilities\r\nWHERE $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\nGROUP BY name\r\nORDER BY count DESC\r\nLIMIT 10\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
                     },
                     "version": "v0"
                   },
@@ -2302,7 +4460,8 @@
             "fieldConfig": {
               "defaults": {
                 "color": {
-                  "mode": "palette-classic"
+                  "fixedColor": "#4868aa",
+                  "mode": "fixed"
                 },
                 "custom": {
                   "axisBorderShow": false,
@@ -2330,12 +4489,8 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
+                      "color": "semi-dark-blue",
                       "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
                     }
                   ]
                 }
@@ -2345,6 +4500,7 @@
             "options": {
               "barRadius": 0,
               "barWidth": 0.5,
+              "colorByField": "count",
               "fullHighlight": false,
               "groupWidth": 0.7,
               "legend": {
@@ -2354,7 +4510,7 @@
                 "showLegend": true
               },
               "orientation": "horizontal",
-              "showValue": "auto",
+              "showValue": "always",
               "stacking": "none",
               "tooltip": {
                 "hideZeros": false,
@@ -2365,7 +4521,7 @@
               "xTickLabelSpacing": 0
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -2387,8 +4543,27 @@
                     "group": "postgres",
                     "kind": "DataQuery",
                     "spec": {
+                      "editorMode": "code",
                       "format": "table",
-                      "rawSql": "SELECT event_type AS \"Event Type\", COUNT(*) AS count FROM events GROUP BY event_type ORDER BY count DESC LIMIT 10"
+                      "rawQuery": true,
+                      "rawSql": "SELECT event_type AS \"Event Type\", COUNT(*) AS count\r\nFROM events\r\nWHERE $__timeFilter(created_at)\r\n  AND '$view' IN ('main','log360')\r\nGROUP BY event_type\r\nORDER BY count DESC\r\nLIMIT 10\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
                     },
                     "version": "v0"
                   },
@@ -2411,7 +4586,8 @@
             "fieldConfig": {
               "defaults": {
                 "color": {
-                  "mode": "palette-classic"
+                  "fixedColor": "#4868aa",
+                  "mode": "fixed"
                 },
                 "custom": {
                   "axisBorderShow": false,
@@ -2428,7 +4604,8 @@
                   },
                   "lineWidth": 1,
                   "scaleDistribution": {
-                    "type": "linear"
+                    "log": 2,
+                    "type": "log"
                   },
                   "thresholdsStyle": {
                     "mode": "off"
@@ -2453,6 +4630,7 @@
             "options": {
               "barRadius": 0,
               "barWidth": 0.5,
+              "colorByField": "count",
               "fullHighlight": false,
               "groupWidth": 0.7,
               "legend": {
@@ -2462,7 +4640,7 @@
                 "showLegend": true
               },
               "orientation": "horizontal",
-              "showValue": "auto",
+              "showValue": "always",
               "stacking": "none",
               "tooltip": {
                 "hideZeros": false,
@@ -2473,7 +4651,7 @@
               "xTickLabelSpacing": 0
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -2495,8 +4673,27 @@
                     "group": "postgres",
                     "kind": "DataQuery",
                     "spec": {
+                      "editorMode": "code",
                       "format": "table",
-                      "rawSql": "SELECT SUM(CASE WHEN severity='critical' THEN 1 ELSE 0 END) AS \"Critical\", SUM(CASE WHEN severity='high' THEN 1 ELSE 0 END) AS \"High\", SUM(CASE WHEN severity='medium' THEN 1 ELSE 0 END) AS \"Medium\", SUM(CASE WHEN severity='low' THEN 1 ELSE 0 END) AS \"Low\", SUM(CASE WHEN severity='info' THEN 1 ELSE 0 END) AS \"Info\" FROM vulnerabilities"
+                      "rawQuery": true,
+                      "rawSql": "SELECT\r\n  SUM(CASE WHEN severity='critical' THEN 1 ELSE 0 END) AS \"Critical\",\r\n  SUM(CASE WHEN severity='high'     THEN 1 ELSE 0 END) AS \"High\",\r\n  SUM(CASE WHEN severity='medium'   THEN 1 ELSE 0 END) AS \"Medium\",\r\n  SUM(CASE WHEN severity='low'      THEN 1 ELSE 0 END) AS \"Low\",\r\n  SUM(CASE WHEN severity='info'     THEN 1 ELSE 0 END) AS \"Info\"\r\nFROM vulnerabilities\r\nWHERE $__timeFilter(created_at)\r\n  AND '$view' IN ('main','f5')\r\n",
+                      "sql": {
+                        "columns": [
+                          {
+                            "parameters": [],
+                            "type": "function"
+                          }
+                        ],
+                        "groupBy": [
+                          {
+                            "property": {
+                              "type": "string"
+                            },
+                            "type": "groupBy"
+                          }
+                        ],
+                        "limit": 50
+                      }
                     },
                     "version": "v0"
                   },
@@ -2638,7 +4835,7 @@
               }
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     },
@@ -2661,9 +4858,9 @@
                     "kind": "DataQuery",
                     "spec": {
                       "editorMode": "code",
-                      "format": "time_series",
+                      "format": "table",
                       "rawQuery": true,
-                      "rawSql": "SELECT\r\n  date_trunc('day', detected_at) AS time,\r\n  severity,\r\n  COUNT(*) AS value\r\nFROM vulnerabilities\r\nWHERE host ~ '${host:regex}'\r\nGROUP BY 1, 2\r\nORDER BY 1\r\n",
+                      "rawSql": "SELECT\r\n  changed_at AS \"Changed At\",\r\n  host        AS \"Host\",\r\n  name        AS \"Vulnerability\",\r\n  old_severity AS \"From\",\r\n  new_severity AS \"To\",\r\n  CASE\r\n    WHEN CASE new_severity WHEN 'critical' THEN 4 WHEN 'high' THEN 3 WHEN 'medium' THEN 2 WHEN 'low' THEN 1 ELSE 0 END\r\n       > CASE old_severity WHEN 'critical' THEN 4 WHEN 'high' THEN 3 WHEN 'medium' THEN 2 WHEN 'low' THEN 1 ELSE 0 END\r\n    THEN '↑ worse'\r\n    WHEN CASE new_severity WHEN 'critical' THEN 4 WHEN 'high' THEN 3 WHEN 'medium' THEN 2 WHEN 'low' THEN 1 ELSE 0 END\r\n       < CASE old_severity WHEN 'critical' THEN 4 WHEN 'high' THEN 3 WHEN 'medium' THEN 2 WHEN 'low' THEN 1 ELSE 0 END\r\n    THEN '↓ better'\r\n    ELSE '→ lateral'\r\n  END AS \"Direction\"\r\nFROM vulnerability_changes\r\nWHERE host ~ '${host:regex}'\r\n  AND $__timeFilter(changed_at)\r\n  AND '$view' = 'f5'\r\nORDER BY changed_at DESC\r\n",
                       "sql": {
                         "columns": [
                           {
@@ -2692,39 +4889,29 @@
             "transformations": []
           }
         },
-        "description": "",
+        "description": "Per Upload Log",
         "id": 9,
         "links": [],
         "title": "F5 Severity Escalations",
         "vizConfig": {
-          "group": "barchart",
+          "group": "table",
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
               "defaults": {
                 "color": {
-                  "mode": "palette-classic"
+                  "mode": "thresholds"
                 },
                 "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "fillOpacity": 100,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
+                  "align": "auto",
+                  "cellOptions": {
+                    "type": "auto"
                   },
-                  "lineWidth": 0,
-                  "scaleDistribution": {
-                    "type": "linear"
+                  "filterable": true,
+                  "footer": {
+                    "reducers": []
                   },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
+                  "inspect": false
                 },
                 "thresholds": {
                   "mode": "absolute",
@@ -2740,325 +4927,544 @@
                   ]
                 }
               },
-              "overrides": []
+              "overrides": [
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "To",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 70
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "From",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 87
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Vulnerability",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 238
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Changed At",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 191
+                    }
+                  ]
+                },
+                {
+                  "matcher": {
+                    "id": "byName",
+                    "options": "Host",
+                    "scope": "series"
+                  },
+                  "properties": [
+                    {
+                      "id": "custom.width",
+                      "value": 193
+                    }
+                  ]
+                }
+              ]
             },
             "options": {
-              "barRadius": 0.05,
-              "barWidth": 0.95,
-              "fullHighlight": false,
-              "groupWidth": 0.8,
-              "legend": {
-                "calcs": [],
-                "displayMode": "list",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "orientation": "auto",
-              "showValue": "auto",
-              "stacking": "none",
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "single",
-                "sort": "none"
-              },
-              "xField": "time",
-              "xTickLabelRotation": 0,
-              "xTickLabelSpacing": 100
+              "cellHeight": "sm",
+              "showHeader": true
             }
           },
-          "version": "13.1.0-25668120414"
+          "version": "13.1.0-25848649471"
         }
       }
     }
   },
   "layout": {
-    "kind": "GridLayout",
+    "kind": "RowsLayout",
     "spec": {
-      "items": [
+      "rows": [
         {
-          "kind": "GridLayoutItem",
+          "kind": "RowsLayoutRow",
           "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-1"
+            "collapse": false,
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-25"
+                      },
+                      "height": 4,
+                      "width": 5,
+                      "x": 0,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-2"
+                      },
+                      "height": 4,
+                      "width": 5,
+                      "x": 5,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-3"
+                      },
+                      "height": 4,
+                      "width": 5,
+                      "x": 10,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-4"
+                      },
+                      "height": 4,
+                      "width": 5,
+                      "x": 15,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-5"
+                      },
+                      "height": 4,
+                      "width": 4,
+                      "x": 20,
+                      "y": 0
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-15"
+                      },
+                      "height": 4,
+                      "width": 5,
+                      "x": 0,
+                      "y": 4
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-16"
+                      },
+                      "height": 4,
+                      "width": 5,
+                      "x": 5,
+                      "y": 4
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-17"
+                      },
+                      "height": 4,
+                      "width": 5,
+                      "x": 10,
+                      "y": 4
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-18"
+                      },
+                      "height": 4,
+                      "width": 5,
+                      "x": 15,
+                      "y": 4
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-19"
+                      },
+                      "height": 4,
+                      "width": 4,
+                      "x": 20,
+                      "y": 4
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-6"
+                      },
+                      "height": 8,
+                      "width": 12,
+                      "x": 0,
+                      "y": 8
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-7"
+                      },
+                      "height": 8,
+                      "width": 12,
+                      "x": 12,
+                      "y": 8
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-8"
+                      },
+                      "height": 8,
+                      "width": 8,
+                      "x": 0,
+                      "y": 16
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-14"
+                      },
+                      "height": 8,
+                      "width": 8,
+                      "x": 8,
+                      "y": 16
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-23"
+                      },
+                      "height": 8,
+                      "width": 8,
+                      "x": 16,
+                      "y": 16
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-22"
+                      },
+                      "height": 8,
+                      "width": 24,
+                      "x": 0,
+                      "y": 24
+                    }
+                  },
+                  {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-13"
+                      },
+                      "height": 7,
+                      "width": 24,
+                      "x": 0,
+                      "y": 32
+                    }
+                  }
+                ]
+              }
             },
-            "height": 4,
-            "width": 5,
-            "x": 0,
-            "y": 0
+            "title": "MAIN"
           }
         },
         {
-          "kind": "GridLayoutItem",
+          "kind": "RowsLayoutRow",
           "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-2"
+            "collapse": false,
+            "layout": {
+              "kind": "AutoGridLayout",
+              "spec": {
+                "columnWidthMode": "standard",
+                "items": [
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-26"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-28"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-29"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-30"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-31"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-32"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-33"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-9"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-10"
+                      }
+                    }
+                  }
+                ],
+                "maxColumnCount": 3,
+                "rowHeightMode": "standard"
+              }
             },
-            "height": 4,
-            "width": 5,
-            "x": 5,
-            "y": 0
+            "title": "F5"
           }
         },
         {
-          "kind": "GridLayoutItem",
+          "kind": "RowsLayoutRow",
           "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-3"
+            "collapse": false,
+            "layout": {
+              "kind": "AutoGridLayout",
+              "spec": {
+                "columnWidthMode": "standard",
+                "items": [
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-27"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-34"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-35"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-36"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-37"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-38"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-21"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-12"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-39"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-40"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-41"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "AutoGridLayoutItem",
+                    "spec": {
+                      "element": {
+                        "kind": "ElementReference",
+                        "name": "panel-42"
+                      }
+                    }
+                  }
+                ],
+                "maxColumnCount": 3,
+                "rowHeightMode": "standard"
+              }
             },
-            "height": 4,
-            "width": 5,
-            "x": 10,
-            "y": 0
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-4"
-            },
-            "height": 4,
-            "width": 5,
-            "x": 15,
-            "y": 0
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-5"
-            },
-            "height": 4,
-            "width": 4,
-            "x": 20,
-            "y": 0
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-15"
-            },
-            "height": 4,
-            "width": 5,
-            "x": 0,
-            "y": 4
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-16"
-            },
-            "height": 4,
-            "width": 5,
-            "x": 5,
-            "y": 4
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-17"
-            },
-            "height": 4,
-            "width": 5,
-            "x": 10,
-            "y": 4
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-18"
-            },
-            "height": 4,
-            "width": 5,
-            "x": 15,
-            "y": 4
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-19"
-            },
-            "height": 4,
-            "width": 4,
-            "x": 20,
-            "y": 4
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-6"
-            },
-            "height": 8,
-            "width": 12,
-            "x": 0,
-            "y": 8
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-7"
-            },
-            "height": 8,
-            "width": 12,
-            "x": 12,
-            "y": 8
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-8"
-            },
-            "height": 8,
-            "width": 8,
-            "x": 0,
-            "y": 16
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-9"
-            },
-            "height": 8,
-            "width": 8,
-            "x": 8,
-            "y": 16
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-14"
-            },
-            "height": 8,
-            "width": 8,
-            "x": 16,
-            "y": 16
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-20"
-            },
-            "height": 9,
-            "width": 12,
-            "x": 0,
-            "y": 24
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-10"
-            },
-            "height": 9,
-            "width": 12,
-            "x": 12,
-            "y": 24
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-12"
-            },
-            "height": 10,
-            "width": 24,
-            "x": 0,
-            "y": 33
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-13"
-            },
-            "height": 7,
-            "width": 24,
-            "x": 0,
-            "y": 43
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-11"
-            },
-            "height": 8,
-            "width": 24,
-            "x": 0,
-            "y": 50
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-21"
-            },
-            "height": 9,
-            "width": 24,
-            "x": 0,
-            "y": 58
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-22"
-            },
-            "height": 10,
-            "width": 24,
-            "x": 0,
-            "y": 67
+            "title": "LOG360"
           }
         }
       ]
@@ -3083,10 +5489,10 @@
       "1d"
     ],
     "fiscalYearStartMonth": 0,
-    "from": "now-7d",
+    "from": "2026-01-22T23:28:11.858Z",
     "hideTimepicker": false,
     "timezone": "browser",
-    "to": "now"
+    "to": "2026-09-03T23:28:11.858Z"
   },
   "title": "NYK-FIL Security Monitoring",
   "variables": [
@@ -3116,9 +5522,7 @@
         "allValue": ".*",
         "allowCustomValue": true,
         "current": {
-          "text": [
-            "All"
-          ],
+          "text": "All",
           "value": [
             "$__all"
           ]
@@ -3169,6 +5573,38 @@
         "regexApplyTo": "value",
         "skipUrlSync": false,
         "sort": "disabled"
+      }
+    },
+    {
+      "kind": "CustomVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "Main",
+          "value": "main"
+        },
+        "hide": "dontHide",
+        "includeAll": false,
+        "label": "Dashboard View",
+        "multi": false,
+        "name": "view",
+        "options": [],
+        "query": "Main : main, F5 : f5, Log360 : log360",
+        "skipUrlSync": false,
+        "valuesFormat": "csv"
+      }
+    },
+    {
+      "kind": "ConstantVariable",
+      "spec": {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "hide": "hideVariable",
+        "name": "constant0",
+        "query": "",
+        "skipUrlSync": true
       }
     }
   ]

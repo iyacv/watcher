@@ -10,3 +10,7 @@ dist/
 build/downloads/
 *.db
 *.db-journal
+
+# Runtime log (rotating) — generated at run time, not source
+watcher.log
+watcher.log.*

@@ -5,146 +5,135 @@ Security Monitoring System
 
 OVERVIEW
 --------
-This system runs on ONE designated "host" PC. That PC:
-  - Watches the inbox\ folder for F5 / Log360 export files
-  - Stores all alerts in a local database (capstone.db)
-  - Hosts the Grafana dashboard
+This is a lightweight watcher that uploads your F5 and Log360
+log exports to the central Supabase database. The Grafana
+dashboard reads from that database and is hosted in the cloud
+(URL provided by your administrator).
 
-Other staff members do NOT need to install anything.
-They view the dashboard from their own PC's web browser,
-over the office network.
+What this installer does:
+  - Sets up a folder that watches for log files
+  - Auto-starts every time you log in to Windows
+  - Pushes every file you drop in to the shared database
 
-All data is retained in capstone.db on the host PC,
-regardless of who is viewing the dashboard.
+You do NOT install Python, Grafana, or any database.
+Everything needed is bundled. The database and dashboard
+already exist online.
 
 
-INSTALLATION (one-time, ~2 minutes — host PC only)
---------------------------------------------------
-1. On the chosen host PC, extract this ZIP anywhere.
+INSTALLATION (one-time, under 1 minute)
+---------------------------------------
+You should have received TWO things from your administrator:
+  - This ZIP file (the installer)
+  - A DATABASE_URL (a single line starting with "postgresql://")
+
+1. Extract the ZIP anywhere on your PC.
    Recommended: C:\NYKFilWatcher
 
-2. RIGHT-CLICK setup.bat and choose "Run as administrator".
-   (Admin rights are needed once, to open the firewall
-    port so other staff PCs can reach the dashboard.)
+2. Double-click setup.bat
+   (Just a normal double-click — no admin rights needed.)
 
-3. When it finishes, the host PC's browser opens at:
-       http://localhost:3000
+3. When prompted, paste the DATABASE_URL your administrator
+   sent you, then press Enter.
 
-   First login:  admin / admin
-   (You will be asked to set a new password.)
+4. When it finishes, that's it. The watcher is running
+   in the background and will start automatically every
+   time you log in to Windows.
 
-That's it on the host PC — Python and Grafana are bundled.
-
-
-GIVING OTHER STAFF ACCESS
--------------------------
-A. Find the host PC's IP address.
-   The setup.bat script prints it at the end, e.g.:
-       From other staff PCs: http://192.168.1.50:3000
-
-   Or open Command Prompt on the host PC and run:
-       ipconfig
-   Look for "IPv4 Address" under your Wi-Fi or Ethernet
-   adapter (something like 192.168.x.x or 10.x.x.x).
-
-B. Create a Grafana account for each staff member.
-   On the host PC (or from any browser logged in as admin):
-       Administration  ->  Users and access  ->  Users
-       ->  New user
-   New users default to the "Viewer" role (read-only),
-   which is what you want for most staff.
-   Only admins can edit the dashboard.
-
-C. Share the URL with staff:
-       http://<host-pc-ip>:3000
-   e.g. http://192.168.1.50:3000
-
-   They open it in any browser (Chrome, Edge, Firefox)
-   on a PC connected to the same office network,
-   and log in with the account you created for them.
-
-
-REQUIREMENTS FOR MULTI-STAFF ACCESS
------------------------------------
-- All staff PCs must be on the same office network
-  (same Wi-Fi or LAN) as the host PC.
-- The host PC must stay powered on and logged in
-  during the hours staff need the dashboard.
-- The host PC's IP should ideally be static (ask IT
-  to reserve it on the router) so the URL doesn't
-  change. If the IP changes, just share the new one.
+You only ever need to paste the URL once. After that,
+re-running setup.bat reuses what you pasted.
 
 
 DAILY USE
 ---------
-- Drop F5 or Log360 export files (XML or JSON) into:
-      <install-folder>\inbox\
-  on the HOST PC.
+Drop F5 or Log360 export files into:
+    <install-folder>\inbox\
 
-  The watcher picks them up automatically, deduplicates
-  alerts, applies severity priority, correlates F5 vulns
-  with Log360 events, and updates the dashboard live.
+Supported file types:
+  - .xml   (F5 ASM scan exports, Log360 XML)
+  - .xlsx  (Log360 "All Events" Excel exports)
+  - .json  (Log360 JSON exports)
 
-- Successfully processed files are deleted by default
-  (or moved to processed\ if KEEP_PROCESSED is enabled).
+The watcher picks them up automatically (within seconds),
+parses them, deduplicates, and uploads to Supabase.
 
-- Files that fail to parse go to failed\ for review.
-
-- All alerts, vulnerabilities, and events are stored
-  permanently in capstone.db on the host PC. Data is
-  NOT lost when the dashboard is closed or when staff
-  log out.
+What happens to the file after processing:
+  - Success     -> deleted from inbox (or moved to processed\
+                   if KEEP_PROCESSED=true in .env)
+  - Parse error -> moved to failed\ so you can review it
 
 
-AUTO-START
-----------
-On the host PC, the watcher and Grafana are registered
-as Task Scheduler tasks:
-      NYKFilWatcher
-      NYKFilGrafana
-They start automatically every time the host PC logs in.
+VIEWING THE DASHBOARD
+---------------------
+Open the Grafana Cloud URL provided by your administrator
+in any web browser. Log in with the credentials given to you.
+
+The dashboard is shared — everyone you give access to sees
+the same data. You can view it from any PC, anywhere with
+internet (it does NOT have to be on the office network).
 
 
-BACKING UP YOUR DATA
---------------------
-The entire history is in a single file:
-      <install-folder>\capstone.db
-Copy this file to a backup location periodically
-(USB drive, network share, etc.) to preserve history.
+CHECKING THAT IT'S WORKING
+--------------------------
+1. Drop one of your real F5 or Log360 export files into inbox\
+2. Wait about 10 seconds — the file should disappear from inbox\
+   (it was uploaded to Supabase and then deleted)
+3. Open the Grafana dashboard. The new logs should appear in
+   the panels within seconds.
+
+If the file ends up in failed\ instead, something in the file
+couldn't be parsed. Send the file in failed\ to your
+administrator for review.
+
+
+STOPPING / RESTARTING THE WATCHER
+---------------------------------
+Stop:
+    schtasks /end /tn "NYKFilWatcher"
+
+Start again:
+    schtasks /run /tn "NYKFilWatcher"
+
+Or open Task Scheduler from the Start menu, find "NYKFilWatcher"
+in the list, and right-click to start/stop.
+
+
+UNINSTALL
+---------
+1. Stop the auto-start:
+       schtasks /delete /tn "NYKFilWatcher" /f
+2. Delete the installation folder.
+
+Nothing is left behind. No registry entries, no services,
+no other system changes.
 
 
 TROUBLESHOOTING
 ---------------
-- Staff cannot reach the dashboard from their PC?
-  1. Confirm they are on the same office network.
-  2. On the host PC, try opening http://localhost:3000
-     first — if that works, the service is running.
-  3. Re-run setup.bat as Administrator on the host PC
-     to re-add the firewall rule.
-  4. Some office networks block inter-PC traffic
-     ("client isolation"). Ask IT to allow PCs to
-     reach the host PC on TCP port 3000.
+Files stay in inbox\ and never disappear:
+  - Open Task Manager and check that "pythonw.exe" is running.
+  - If not, double-click setup.bat again — it re-registers
+    and starts the watcher.
 
-- Grafana not loading on the host PC?
-  Open Task Scheduler -> run NYKFilGrafana,
-  or start manually:
-      grafana\bin\grafana-server.exe --homepath grafana
+Files end up in failed\:
+  - The file format wasn't recognised or had bad data.
+  - Open the file in failed\ and check the first few rows
+    look like a normal Log360 / F5 export.
+  - For xlsx files: the "All Events" sheet must have these
+    columns in this order:
+        Time, Log Source, Event ID, Display Name, Source, Severity
 
-- Watcher not picking up files?
-  Open Task Scheduler -> run NYKFilWatcher.
+Dashboard doesn't show new data:
+  - First check that files are disappearing from inbox\
+    (that confirms the upload worked).
+  - Refresh the Grafana dashboard in your browser.
+  - Check the time range picker at the top right of the
+    dashboard — if it's set to a narrow window, your new
+    data may be outside it. Try "Last 24 hours".
 
-- Forgot the admin password?
-  On the host PC, from the install folder:
-      grafana\bin\grafana-cli.exe --homepath grafana ^
-          admin reset-admin-password <newpassword>
-
-- Need to uninstall?
-  Run on the host PC:
-      schtasks /delete /tn "NYKFilWatcher" /f
-      schtasks /delete /tn "NYKFilGrafana" /f
-      netsh advfirewall firewall delete rule ^
-          name="NYKFil Grafana Dashboard"
-  Then delete the install folder.
+Need to change the database connection:
+  - Edit the .env file in this folder.
+  - DATABASE_URL=postgresql://... is the line to change.
+  - Restart the watcher (see above).
 
 
 SUPPORT
