@@ -1,7 +1,3 @@
-"""
-Main entry point. Run this script to start watching the inbox folder.
-Usage: python watcher.py
-"""
 
 import time
 import shutil
@@ -13,9 +9,7 @@ import threading
 from datetime import datetime
 from pathlib import Path
 
-# Ensure this script's directory is importable even when launched from
-# Task Scheduler or under embeddable Python (which omits the script dir
-# from sys.path via python._pth).
+
 _HERE = Path(__file__).resolve().parent
 if str(_HERE) not in sys.path:
     sys.path.insert(0, str(_HERE))
@@ -37,20 +31,24 @@ _log_fmt = logging.Formatter(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-# Rotating file handler: keeps history so success/failure is provable even
-# though the watcher runs hidden via Task Scheduler (no visible console).
 _file_handler = logging.handlers.RotatingFileHandler(
     _LOG_FILE, maxBytes=1_000_000, backupCount=3, encoding="utf-8"
 )
 _file_handler.setFormatter(_log_fmt)
 
-# Console handler too, for when the watcher is run manually from a terminal.
 _console_handler = logging.StreamHandler()
 _console_handler.setFormatter(_log_fmt)
 
 logging.basicConfig(level=logging.INFO, handlers=[_file_handler, _console_handler])
 log = logging.getLogger(__name__)
 
+class UnsupportedFileType(Exception):
+    """Raised when a dropped file is not an F5 / Log360 export format.
+
+    This is an explicit, expected rejection — not a parser failure. It lets
+    junk (.txt, .png, .pdf, …) land in failed/ with a clear reason instead of
+    being guessed at and crashing a parser deep in the pipeline.
+    """
 
 def detect_source(filepath: str) -> str:
     """Guess file source from filename prefix, extension, or content tag."""
@@ -61,10 +59,10 @@ def detect_source(filepath: str) -> str:
         return "f5"
     if name.startswith("log360") or name.startswith("l360"):
         return "log360"
-    # Excel exports only come from Log360 — F5 is XML-only
+    # Excel exports only come from Log360 - F5 is XML
     if ext in (".xlsx", ".xlsm"):
         return "log360"
-    # Fallback: peek at the file (text formats only)
+  
     with open(filepath, "r", errors="ignore") as f:
         head = f.read(512)
     if "<scanner_vulnerabilities" in head or "<ScanResults" in head or "<F5" in head or "CVE" in head:
@@ -81,7 +79,7 @@ def process_file(filepath: str):
     key = os.path.normcase(os.path.abspath(filepath))
 
     # Watchdog often fires both on_created and on_moved for a single drop on
-    # Windows. Claim the path atomically so only one thread processes it.
+    # Windows. Claim the path atomically so only one thread processes it
     with _in_flight_lock:
         if key in _in_flight:
             return
@@ -92,6 +90,14 @@ def process_file(filepath: str):
     log.info("Detected new file: %s", path.name)
 
     try:
+      
+        ext = path.suffix.lower()
+        if ext not in config.SUPPORTED_EXTENSIONS:
+            raise UnsupportedFileType(
+                f"'{ext or path.name}' is not a supported format. "
+                f"Accepted: {', '.join(sorted(config.SUPPORTED_EXTENSIONS))}"
+            )
+
         source = detect_source(filepath)
         log.info("Source identified as: %s", source)
 
@@ -108,20 +114,20 @@ def process_file(filepath: str):
         for record in records:
             record["source_file"] = path.name
 
-            # ── Deduplication ─────────────────────────────────────────────
+            # Deduplication
             # For Log360 events (point-in-time happenings), a duplicate hash
-            # means the same event was already recorded — skip entirely.
+            # means the same event was already recorded  skip entirely
             # For F5 vulnerabilities (persistent state), we let duplicates
             # through so the storage layer can update severity/status and
-            # log to vulnerability_changes if anything actually changed.
+            # log to vulnerability_changes if anything actually changed
             if source == "log360" and is_duplicate(record):
                 log.debug("Duplicate skipped: %s on %s", record.get("event_id"), record.get("host"))
                 continue
 
-            # ── Prioritization ────────────────────────────────────────────
+            #Prioritization 
             record = prioritize(record)
 
-            # ── Store ──────────────────────────────────────────────────────
+            #Store 
             if source == "f5":
                 rec_id = insert_vulnerability(conn, record)
             else:
@@ -130,7 +136,7 @@ def process_file(filepath: str):
             mark_seen(record)
             inserted += 1
 
-            # ── Correlation ───────────────────────────────────────────────
+            # Correlation 
             correlation = correlate(conn, record)
             if correlation:
                 flag_correlation(conn, correlation)
@@ -154,15 +160,29 @@ def process_file(filepath: str):
             pass
 
     except FileNotFoundError:
-        # Another watcher instance (or our own move) already claimed the file.
-        # This is benign — just say so and move on without a stack trace.
         log.info("Skipped %s: already handled by another worker.", path.name)
+    except UnsupportedFileType as exc:
+        # Expected rejection, not an error no stack trace. The file still
+        # goes to failed/ with a note so it's visible and auditable.
+        log.warning("Rejected %s: %s", path.name, exc)
+        try:
+            dest = Path(config.FAILED_DIR) / path.name
+            shutil.move(filepath, dest)
+            note = dest.with_suffix(dest.suffix + ".error.txt")
+            note.write_text(
+                f"File:     {path.name}\n"
+                f"Rejected: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"Reason:   Unsupported file type - {exc}\n",
+                encoding="utf-8",
+            )
+        except FileNotFoundError:
+            pass
     except Exception as exc:
         log.error("Failed to process %s: %s", path.name, exc, exc_info=True)
         try:
             dest = Path(config.FAILED_DIR) / path.name
             shutil.move(filepath, dest)
-            # Drop a plain-English reason beside the failed file so anyone
+            # Drop a eason beside the failed file so anyone
             # browsing failed/ sees *why* without reading the watcher log.
             note = dest.with_suffix(dest.suffix + ".error.txt")
             note.write_text(
@@ -180,7 +200,6 @@ def process_file(filepath: str):
 
 class InboxHandler(FileSystemEventHandler):
     # Watchdog fires on_created for new files and on_moved when a file is
-    # renamed/saved-into-folder by some OS copy operations.
     def on_created(self, event):
         if not event.is_directory:
             # Brief pause so the file is fully written before we open it

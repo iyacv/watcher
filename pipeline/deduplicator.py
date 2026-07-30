@@ -1,9 +1,3 @@
-"""
-Deduplication — prevents the same vulnerability/event from being inserted twice.
-
-Uses an in-memory set for the current session and checks the DB for the hash
-on startup, so restarts don't re-insert old records.
-"""
 
 _seen_hashes: set[str] = set()
 
@@ -19,7 +13,7 @@ def mark_seen(record: dict):
 
 
 def load_existing_hashes(conn):
-    """Call once at startup to pre-populate from DB so restarts stay clean."""
+   
     cursor = conn.cursor()
     for table in ("vulnerabilities", "events"):
         try:

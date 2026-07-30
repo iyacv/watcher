@@ -127,7 +127,7 @@ Dashboard doesn't show new data:
     (that confirms the upload worked).
   - Refresh the Grafana dashboard in your browser.
   - Check the time range picker at the top right of the
-    dashboard — if it's set to a narrow window, your new
+    dashboard if it's set to a narrow window, your new
     data may be outside it. Try "Last 24 hours".
 
 Need to change the database connection:
@@ -136,6 +136,4 @@ Need to change the database connection:
   - Restart the watcher (see above).
 
 
-SUPPORT
--------
-Contact: [your contact info here]
+

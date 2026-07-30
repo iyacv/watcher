@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- F5 Web Application Scanner - Vulnerability Report Export -->
+<!-- Organization : NYK-FIL Maritime E Training Inc.         -->
+<!-- Scan Date    : 2026-05-21                               -->
+<!-- Report ID    : NYKFIL-2026-0521-003                     -->
+<!-- Target       : Crew Certification API -->
+<ScanResults>
+
+  <Scan>
+    <ScanDate>2026-05-21</ScanDate>
+    <Target>
+      <Host>192.168.1.50</Host>
+      <Port>443</Port>
+    </Target>
+    <Vulnerabilities>
+
+      <Vulnerability>
+        <ID>CVE-2024-3400</ID>
+        <Name>Command Injection in GlobalProtect Feature</Name>
+        <Severity>Critical</Severity>
+        <CVSS>10.0</CVSS>
+        <Description>A command injection vulnerability in the gateway fronting the certification API allows an unauthenticated attacker to execute arbitrary OS commands with elevated privileges by manipulating the session cookie value during the authentication flow.</Description>
+        <Remediation>Apply the vendor hotfix. Enable Threat Prevention signatures for this CVE. Inspect device telemetry for unexpected file creation under the gateway temp directories.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2024-27198</ID>
+        <Name>Authentication Bypass in CI/CD Web Interface</Name>
+        <Severity>High</Severity>
+        <CVSS>8.8</CVSS>
+        <Description>The build server fronting the certification API deployment pipeline allows an unauthenticated attacker to forge a valid session by abusing an alternative URL path, gaining full administrative control and the ability to inject malicious build steps.</Description>
+        <Remediation>Upgrade the CI/CD server to the fixed release. Rotate all build agent tokens and admin credentials. Audit recently created administrative accounts and build configurations.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>TLS-2026-021</ID>
+        <Name>Weak TLS Cipher Suites Enabled</Name>
+        <Severity>Medium</Severity>
+        <CVSS>5.3</CVSS>
+        <Description>The API endpoint negotiates legacy TLS 1.0 and CBC-mode cipher suites. A man-in-the-middle attacker on the path can downgrade the connection and attempt to recover plaintext from intercepted traffic.</Description>
+        <Remediation>Disable TLS 1.0/1.1 and all CBC and RC4 cipher suites. Require TLS 1.2+ with AEAD ciphers. Enable HSTS with a long max-age.</Remediation>
+      </Vulnerability>
+
+    </Vulnerabilities>
+  </Scan>
+
+</ScanResults>

@@ -1,10 +1,4 @@
-"""
-Postgres backend (cloud mode). Activated when DATABASE_URL is set.
 
-DATABASE_URL examples:
-  postgres://user:pass@host/db
-  postgresql://user:pass@host:5432/db?sslmode=require
-"""
 import os
 import psycopg
 from psycopg.rows import dict_row
@@ -12,13 +6,10 @@ from psycopg.rows import dict_row
 
 def get_connection():
     url = os.environ["DATABASE_URL"]
-    # Supabase (and most managed Postgres) require SSL. Append it if the
-    # pasted URL forgot to set it.
+  
     if "sslmode=" not in url:
         url += ("&" if "?" in url else "?") + "sslmode=require"
-    # Supabase's transaction pooler (port 6543) routes each statement through
-    # a different backend, so server-side prepared statements break across
-    # calls. prepare_threshold=None disables them on this connection.
+   
     conn = psycopg.connect(url, row_factory=dict_row, prepare_threshold=None)
     return conn
 

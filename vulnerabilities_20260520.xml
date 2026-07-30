@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- F5 Web Application Scanner - Vulnerability Report Export -->
+<!-- Organization : NYK-FIL Maritime E Training Inc.         -->
+<!-- Scan Date    : 2026-05-20                               -->
+<!-- Report ID    : NYKFIL-2026-0520-002                     -->
+<!-- Target       : Document Management Portal -->
+<ScanResults>
+
+  <Scan>
+    <ScanDate>2026-05-20</ScanDate>
+    <Target>
+      <Host>192.168.1.40</Host>
+      <Port>8443</Port>
+    </Target>
+    <Vulnerabilities>
+
+      <Vulnerability>
+        <ID>CVE-2023-34362</ID>
+        <Name>SQL Injection in Managed File Transfer</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>The document management portal runs a vulnerable managed file transfer component. An unauthenticated SQL injection in the file transfer web interface allows attackers to deploy a web shell and exfiltrate stored crew certification documents.</Description>
+        <Remediation>Apply the emergency security patch immediately. Inspect the web directories for unauthorized .aspx files. Rotate database service account credentials and review file transfer audit logs.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2022-1388</ID>
+        <Name>iControl REST Authentication Bypass</Name>
+        <Severity>High</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>The management interface exposes the iControl REST API which can be reached without authentication by manipulating the connection and X-F5-Auth-Token headers, allowing arbitrary command execution on the appliance.</Description>
+        <Remediation>Restrict management access to a dedicated administrative network. Apply the vendor patch. Disable the iControl REST endpoint on self IPs if not required.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>INFO-2026-020</ID>
+        <Name>Verbose Error Messages Disclose Stack Traces</Name>
+        <Severity>Low</Severity>
+        <CVSS>3.5</CVSS>
+        <Description>Application errors on the document portal return full stack traces and internal file paths to the client. This discloses framework versions and server-side directory structure that aids an attacker in crafting targeted exploits.</Description>
+        <Remediation>Disable debug mode in production. Return generic error pages to clients and log detailed errors server-side only. Review responses for other sensitive information leakage.</Remediation>
+      </Vulnerability>
+
+    </Vulnerabilities>
+  </Scan>
+
+</ScanResults>

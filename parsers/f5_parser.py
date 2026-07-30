@@ -76,8 +76,7 @@ def _parse_xml(filepath: str) -> list:
     fallback_ts = _file_mtime(filepath)
     records = []
 
-    # Real F5 scanner XML uses <scanner_vulnerabilities>/<vulnerability>.
-    # Also tolerate the older capitalized form.
+
     vulns = root.findall(".//vulnerability") + root.findall(".//Vulnerability")
     for v in vulns:
         records.append(_record(

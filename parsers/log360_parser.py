@@ -9,11 +9,9 @@ _LOG360_SEVERITIES = {"error", "failure", "warning", "information", "success"}
 
 
 def _normalize_severity(raw: str) -> str:
-    """Keep Log360's native vocabulary. F5 uses CVSS-derived severity;
-    Log360 uses Windows event outcomes — they measure different things, so
-    we don't try to flatten one into the other."""
+   
     s = (raw or "").strip().lower()
-    # Common synonyms that show up in Log360 exports
+
     aliases = {
         "audit success":   "success",
         "audit failure":   "failure",
@@ -110,7 +108,7 @@ def _parse_xlsx(filepath: str) -> list:
     while i < len(rows):
         cell_a = rows[i][0] if rows[i] else None
         if isinstance(cell_a, str) and cell_a.strip().lower() == "all events":
-            # Find the next non-blank row — that should be the header
+            # Find the next non-blank row - that should be the header
             j = i + 1
             while j < len(rows) and (not rows[j] or rows[j][0] is None or str(rows[j][0]).strip() == ""):
                 j += 1
@@ -123,7 +121,7 @@ def _parse_xlsx(filepath: str) -> list:
                 for k in range(6)
             )
             if header_norm != EXPECTED_HEADERS:
-                # Not the right "All Events" block — keep scanning
+              
                 i += 1
                 continue
 

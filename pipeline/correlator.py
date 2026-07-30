@@ -1,21 +1,10 @@
-"""
-Correlator — detects possible exploitation events.
-
-Logic:
-  IF an F5 vulnerability exists for host X
-  AND a Log360 event (suspicious type) exists for the same host X
-  AND both occurred within CORRELATION_WINDOW_MINUTES of each other
-  THEN flag as a correlation (possible active exploitation).
-
-Called after every record is inserted. Checks the opposite source in the DB.
-"""
 
 import os
 from datetime import datetime, timedelta, timezone
 
 import config
 
-# Placeholder style: psycopg3 (Postgres) wants %s; sqlite3 wants ?
+
 _PH = "%s" if os.getenv("DATABASE_URL") else "?"
 
 # Log360 event types that suggest active exploitation
@@ -64,7 +53,7 @@ def correlate(conn, record: dict) -> dict | None:
     cursor = conn.cursor()
 
     if source == "f5":
-        # New F5 vuln → look for matching suspicious Log360 event on same host
+       
         placeholders = ",".join([_PH] * len(_SUSPICIOUS_EVENTS))
         sql = f"""
             SELECT event_id, event_type, detected_at
@@ -80,8 +69,7 @@ def correlate(conn, record: dict) -> dict | None:
             cursor.close()
             return {
                 "host":       host,
-                # `vulnerabilities` has no vuln_id column — the identifier
-                # we store in `correlations.vuln_id` is the vuln name (CVE/ID).
+               
                 "vuln_id":    record.get("name"),
                 "event_id":   _row_get(row, "event_id"),
                 "event_type": _row_get(row, "event_type"),

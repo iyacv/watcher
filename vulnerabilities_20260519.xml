@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- F5 Web Application Scanner - Vulnerability Report Export -->
+<!-- Organization : NYK-FIL Maritime E Training Inc.         -->
+<!-- Scan Date    : 2026-05-19                               -->
+<!-- Report ID    : NYKFIL-2026-0519-001                     -->
+<!-- Target       : Crew Training LMS -->
+<ScanResults>
+
+  <Scan>
+    <ScanDate>2026-05-19</ScanDate>
+    <Target>
+      <Host>192.168.1.30</Host>
+      <Port>443</Port>
+    </Target>
+    <Vulnerabilities>
+
+      <Vulnerability>
+        <ID>CVE-2025-0282</ID>
+        <Name>Stack-Based Buffer Overflow in VPN Gateway</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.0</CVSS>
+        <Description>A stack-based buffer overflow in the SSL-VPN component of the crew training gateway allows an unauthenticated remote attacker to achieve code execution by sending an oversized request to the IF-T/TLS handshake. Exploitation grants root-level access to the appliance.</Description>
+        <Remediation>Apply the emergency vendor patch and rotate all VPN gateway credentials. Run the integrity checker tool to confirm the appliance has not been compromised. Restrict management interface access to trusted IPs only.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2024-38856</ID>
+        <Name>Apache OFBiz Authentication Bypass</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>An authentication bypass in the override view functionality of the LMS backend allows an unauthenticated attacker to reach screens that should require login, including the program export endpoint, leading to remote code execution via a crafted ProgramExport request.</Description>
+        <Remediation>Upgrade Apache OFBiz to 18.12.15 or later. Block access to the /webtools and /accounting paths from external networks. Review web server logs for ProgramExport requests.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>XSS-2026-019</ID>
+        <Name>Stored Cross-Site Scripting in Course Feedback</Name>
+        <Severity>Medium</Severity>
+        <CVSS>6.4</CVSS>
+        <Description>The course feedback form stores trainee comments without output encoding. A crafted comment containing a script payload executes in the browser of any instructor who later reviews the feedback, allowing session hijacking of privileged accounts.</Description>
+        <Remediation>HTML-encode all stored user content on output. Apply a strict Content-Security-Policy. Sanitize existing feedback records in the database for embedded markup.</Remediation>
+      </Vulnerability>
+
+    </Vulnerabilities>
+  </Scan>
+
+</ScanResults>

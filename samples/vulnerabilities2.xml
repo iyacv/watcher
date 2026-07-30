@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- F5 Web Application Scanner - Vulnerability Report Export -->
+<!-- Organization : NYK-FIL Maritime E Training Inc.         -->
+<!-- Scan Date    : 2026-05-18                               -->
+<!-- Report ID    : NYKFIL-2026-0518-002                     -->
+<ScanResults>
+
+  <!-- Target: Crew Training LMS -->
+  <Scan>
+    <ScanDate>2026-05-18</ScanDate>
+    <Target>
+      <Host>192.168.1.30</Host>
+      <Port>443</Port>
+    </Target>
+    <Vulnerabilities>
+
+      <Vulnerability>
+        <ID>CVE-2025-0282</ID>
+        <Name>Stack-Based Buffer Overflow in VPN Gateway</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.0</CVSS>
+        <Description>A stack-based buffer overflow in the SSL-VPN component of the crew training gateway allows an unauthenticated remote attacker to achieve code execution by sending an oversized request to the IF-T/TLS handshake. Exploitation grants root-level access to the appliance.</Description>
+        <Remediation>Apply the emergency vendor patch and rotate all VPN gateway credentials. Run the integrity checker tool to confirm the appliance has not been compromised. Restrict management interface access to trusted IPs only.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2024-38856</ID>
+        <Name>Apache OFBiz Authentication Bypass</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>An authentication bypass in the override view functionality of the LMS backend allows an unauthenticated attacker to reach screens that should require login, including the program export endpoint, leading to remote code execution via a crafted ProgramExport request.</Description>
+        <Remediation>Upgrade Apache OFBiz to 18.12.15 or later. Block access to the /webtools and /accounting paths from external networks. Review web server logs for ProgramExport requests.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2024-27198</ID>
+        <Name>Authentication Bypass in CI/CD Web Interface</Name>
+        <Severity>High</Severity>
+        <CVSS>8.8</CVSS>
+        <Description>The build server fronting the LMS deployment pipeline allows an unauthenticated attacker to forge a valid session by abusing an alternative URL path, gaining full administrative control and the ability to inject malicious build steps.</Description>
+        <Remediation>Upgrade the CI/CD server to the fixed release. Rotate all build agent tokens and admin credentials. Audit recently created administrative accounts and build configurations.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2024-3400</ID>
+        <Name>Command Injection in GlobalProtect Feature</Name>
+        <Severity>High</Severity>
+        <CVSS>7.2</CVSS>
+        <Description>A command injection vulnerability in the firewall GlobalProtect gateway allows an unauthenticated attacker to execute arbitrary OS commands with elevated privileges by manipulating the session cookie value during the authentication flow.</Description>
+        <Remediation>Apply the vendor hotfix. Enable Threat Prevention signatures for this CVE. Inspect device telemetry for unexpected file creation under the gateway temp directories.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>XSS-2026-002</ID>
+        <Name>Stored Cross-Site Scripting in Course Feedback</Name>
+        <Severity>Medium</Severity>
+        <CVSS>6.4</CVSS>
+        <Description>The course feedback form stores trainee comments without output encoding. A crafted comment containing a script payload executes in the browser of any instructor who later reviews the feedback, allowing session hijacking of privileged accounts.</Description>
+        <Remediation>HTML-encode all stored user content on output. Apply a strict Content-Security-Policy. Sanitize existing feedback records in the database for embedded markup.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>COOKIE-2026-002</ID>
+        <Name>Session Cookie Missing Secure and HttpOnly Flags</Name>
+        <Severity>Low</Severity>
+        <CVSS>3.7</CVSS>
+        <Description>The LMS session cookie is issued without the Secure and HttpOnly attributes. The cookie can be transmitted over plain HTTP and is accessible to client-side JavaScript, increasing the risk of session theft via network sniffing or XSS.</Description>
+        <Remediation>Set the Secure, HttpOnly, and SameSite=Strict attributes on all session cookies. Enforce HTTPS-only access to the LMS via HSTS.</Remediation>
+      </Vulnerability>
+
+    </Vulnerabilities>
+  </Scan>
+
+  <!-- Target: Document Management Portal -->
+  <Scan>
+    <ScanDate>2026-05-18</ScanDate>
+    <Target>
+      <Host>192.168.1.40</Host>
+      <Port>8443</Port>
+    </Target>
+    <Vulnerabilities>
+
+      <Vulnerability>
+        <ID>CVE-2023-34362</ID>
+        <Name>SQL Injection in Managed File Transfer</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>The document management portal runs a vulnerable managed file transfer component. An unauthenticated SQL injection in the file transfer web interface allows attackers to deploy a web shell and exfiltrate stored crew certification documents.</Description>
+        <Remediation>Apply the emergency security patch immediately. Inspect the web directories for unauthorized .aspx files. Rotate database service account credentials and review file transfer audit logs.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2022-1388</ID>
+        <Name>iControl REST Authentication Bypass</Name>
+        <Severity>High</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>The management interface exposes the iControl REST API which can be reached without authentication by manipulating the connection and X-F5-Auth-Token headers, allowing arbitrary command execution on the appliance.</Description>
+        <Remediation>Restrict management access to a dedicated administrative network. Apply the vendor patch. Disable the iControl REST endpoint on self IPs if not required.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>INFO-2026-002</ID>
+        <Name>Verbose Error Messages Disclose Stack Traces</Name>
+        <Severity>Low</Severity>
+        <CVSS>3.5</CVSS>
+        <Description>Application errors on the document portal return full stack traces and internal file paths to the client. This discloses framework versions and server-side directory structure that aids an attacker in crafting targeted exploits.</Description>
+        <Remediation>Disable debug mode in production. Return generic error pages to clients and log detailed errors server-side only. Review responses for other sensitive information leakage.</Remediation>
+      </Vulnerability>
+
+    </Vulnerabilities>
+  </Scan>
+
+</ScanResults>

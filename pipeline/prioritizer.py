@@ -1,11 +1,3 @@
-"""
-Prioritizer — adjusts severity based on business rules before storage.
-
-Rules applied in order (first match wins for escalation):
-  1. CVSS >= 9.0 → always critical
-  2. Vulnerability is in a known high-value target list → escalate one level
-  3. Aging: if detected_at is more than AGING_THRESHOLD_DAYS old → escalate one level
-"""
 
 from datetime import datetime, timezone
 
@@ -41,7 +33,7 @@ def _parse_dt(ts: str) -> datetime:
 def prioritize(record: dict) -> dict:
     # All escalation rules use F5/CVSS semantics. Log360 events use their own
     # native vocabulary (error/failure/warning/information/success) which we
-    # don't try to escalate — they describe Windows event outcomes, not
+    # don't try to escalate they describe Windows event outcomes, not
     # vulnerability risk.
     if record.get("source") != "f5":
         return record

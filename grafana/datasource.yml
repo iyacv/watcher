@@ -1,5 +1,4 @@
-# Place this file in: grafana/provisioning/datasources/datasource.yml
-# Grafana will auto-load it on startup.
+
 
 apiVersion: 1
 
@@ -14,6 +13,6 @@ datasources:
       maxIdleConns: 10
       connMaxLifetime: 14400
     secureJsonData:
-      password: ""        # ← fill in your MySQL root password
+      password: ""       
     isDefault: true
     editable: true

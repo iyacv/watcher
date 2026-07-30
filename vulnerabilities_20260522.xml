@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- F5 Web Application Scanner - Vulnerability Report Export -->
+<!-- Organization : NYK-FIL Maritime E Training Inc.         -->
+<!-- Scan Date    : 2026-05-22                               -->
+<!-- Report ID    : NYKFIL-2026-0522-004                     -->
+<!-- Target       : Trainee Self-Service Portal -->
+<ScanResults>
+
+  <Scan>
+    <ScanDate>2026-05-22</ScanDate>
+    <Target>
+      <Host>192.168.1.60</Host>
+      <Port>8080</Port>
+    </Target>
+    <Vulnerabilities>
+
+      <Vulnerability>
+        <ID>CVE-2021-44228</ID>
+        <Name>Log4Shell Remote Code Execution</Name>
+        <Severity>Critical</Severity>
+        <CVSS>10.0</CVSS>
+        <Description>The self-service portal logs user-controlled input through a vulnerable Log4j 2 version. A crafted User-Agent or form value containing a JNDI lookup string triggers remote class loading and code execution on the application server.</Description>
+        <Remediation>Upgrade Log4j to 2.17.1 or later. Set log4j2.formatMsgNoLookups=true as an interim mitigation. Hunt application logs for jndi: strings and review outbound LDAP/RMI connections.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2023-22515</ID>
+        <Name>Broken Access Control in Collaboration Suite</Name>
+        <Severity>High</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>A broken access control flaw lets an unauthenticated attacker create administrator accounts on the trainee portal's collaboration module, taking full control of the instance.</Description>
+        <Remediation>Upgrade to the fixed release. Audit the user table for unexpected administrator accounts created recently. Block the setup endpoints from external networks.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CSRF-2026-022</ID>
+        <Name>Missing Anti-CSRF Tokens on Profile Update</Name>
+        <Severity>Medium</Severity>
+        <CVSS>5.4</CVSS>
+        <Description>Profile and password-change forms on the trainee portal do not include anti-CSRF tokens. An attacker can host a malicious page that silently changes a logged-in trainee's email or password.</Description>
+        <Remediation>Implement per-session anti-CSRF tokens on all state-changing requests. Set SameSite=Lax on session cookies. Re-prompt for the current password on sensitive changes.</Remediation>
+      </Vulnerability>
+
+    </Vulnerabilities>
+  </Scan>
+
+</ScanResults>

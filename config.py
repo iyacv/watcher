@@ -25,3 +25,12 @@ SEVERITY_RANK = {"critical": 4, "high": 3, "medium": 2, "low": 1, "info": 0}
 # False (default): delete the file after successful processing to save disk.
 # True: move to processed/ for audit trail.
 KEEP_PROCESSED = os.getenv("KEEP_PROCESSED", "false").lower() in ("true", "1", "yes")
+
+# ── Accepted file types ───────────────────────────────────────────────────────
+# The only two export formats this system ingests:
+#   .xml  - F5 vulnerability scans
+#   .xlsx - Log360 event reports
+# Anything else (.txt, .png, .pdf, .docx, .json, .xlsm, …) is rejected up front
+# and moved to failed/ with a clear "unsupported file type" note  instead of
+# being guessed at and crashing a parser. Lowercase, leading dot.
+SUPPORTED_EXTENSIONS = {".xml", ".xlsx"}

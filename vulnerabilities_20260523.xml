@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- F5 Web Application Scanner - Vulnerability Report Export -->
+<!-- Organization : NYK-FIL Maritime E Training Inc.         -->
+<!-- Scan Date    : 2026-05-23                               -->
+<!-- Report ID    : NYKFIL-2026-0523-005                     -->
+<!-- Target       : Maritime Records Database Frontend -->
+<ScanResults>
+
+  <Scan>
+    <ScanDate>2026-05-23</ScanDate>
+    <Target>
+      <Host>192.168.1.70</Host>
+      <Port>443</Port>
+    </Target>
+    <Vulnerabilities>
+
+      <Vulnerability>
+        <ID>CVE-2023-34362</ID>
+        <Name>SQL Injection in Records Search</Name>
+        <Severity>Critical</Severity>
+        <CVSS>9.8</CVSS>
+        <Description>The records database frontend passes the crew search parameter directly into a SQL query. An unauthenticated attacker can extract the entire seafarer records table, including passport and certificate numbers, via UNION-based injection.</Description>
+        <Remediation>Use parameterized queries for all database access. Apply WAF virtual-patching rules for the search endpoint. Review database audit logs for large SELECT operations.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>CVE-2024-21762</ID>
+        <Name>Out-of-Bounds Write in SSL VPN</Name>
+        <Severity>High</Severity>
+        <CVSS>9.6</CVSS>
+        <Description>An out-of-bounds write in the SSL-VPN appliance protecting the records database allows a remote unauthenticated attacker to execute arbitrary code via specially crafted requests.</Description>
+        <Remediation>Apply the vendor patch immediately. Disable SSL-VPN if not required until patched. Review VPN logs for crashes and unexpected sessions.</Remediation>
+      </Vulnerability>
+
+      <Vulnerability>
+        <ID>HDR-2026-023</ID>
+        <Name>Missing Security Response Headers</Name>
+        <Severity>Low</Severity>
+        <CVSS>3.1</CVSS>
+        <Description>The records frontend does not set X-Frame-Options, X-Content-Type-Options, or a Content-Security-Policy header, increasing exposure to clickjacking and MIME-sniffing attacks.</Description>
+        <Remediation>Add X-Frame-Options: DENY, X-Content-Type-Options: nosniff, and a restrictive Content-Security-Policy to all responses. Verify via an external header scanner.</Remediation>
+      </Vulnerability>
+
+    </Vulnerabilities>
+  </Scan>
+
+</ScanResults>
